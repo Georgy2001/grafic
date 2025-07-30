@@ -47,11 +47,28 @@ class ShiftType(str, Enum):
     NIGHT = "night"
     CUSTOM = "custom"
 
+class Store(BaseModel):
+    id: str
+    name: str
+    address: str
+    created_at: datetime
+    is_active: bool = True
+
+class StoreCreate(BaseModel):
+    name: str
+    address: str
+
+class StoreUpdate(BaseModel):
+    name: Optional[str] = None
+    address: Optional[str] = None
+    is_active: Optional[bool] = None
+
 class User(BaseModel):
     id: str
     email: str
     name: str
     role: UserRole
+    store_ids: List[str] = []  # Stores this user can access (empty for managers = all stores)
     created_at: datetime
 
 class UserCreate(BaseModel):
@@ -59,6 +76,7 @@ class UserCreate(BaseModel):
     name: str
     password: str
     role: UserRole = UserRole.EMPLOYEE
+    store_ids: List[str] = []  # For employees, specify which stores they work at
 
 class UserLogin(BaseModel):
     email: str
