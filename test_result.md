@@ -315,9 +315,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Store Management API testing completed"
-    - "Store-specific schedule functionality validated"
-    - "Access control and permissions verified"
+    - "Frontend stores functionality testing"
+    - "Store-specific schedule interface testing"
+    - "User assignment interface testing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
