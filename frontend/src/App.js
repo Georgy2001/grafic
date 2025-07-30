@@ -215,6 +215,13 @@ function App() {
     return days;
   };
 
+  const [editingDay, setEditingDay] = useState(null);
+  const [shiftForm, setShiftForm] = useState({
+    type: 'day',
+    hours: null,
+    selectedEmployees: []
+  });
+
   const editDayShift = (dateStr) => {
     const dayShift = schedule?.shifts?.find(s => s.date === dateStr) || {
       date: dateStr,
@@ -223,40 +230,28 @@ function App() {
       hours: null
     };
 
-    const newType = prompt('Тип смены (day/night/custom):', dayShift.type);
-    if (!newType) return;
+    setShiftForm({
+      type: dayShift.type,
+      hours: dayShift.hours,
+      selectedEmployees: dayShift.assignments?.map(a => a.employee_id) || []
+    });
+    setEditingDay(dateStr);
+  };
 
-    let hours = null;
-    if (newType === 'custom') {
-      hours = parseInt(prompt('Количество часов:', dayShift.hours || 8));
-      if (!hours) return;
-    }
-
-    const employeeIds = prompt(
-      'ID сотрудников через запятую:\n' + users.map(u => `${u.id}: ${u.name}`).join('\n'),
-      dayShift.assignments?.map(a => a.employee_id).join(',') || ''
-    );
-
-    if (employeeIds === null) return;
-
-    const assignments = employeeIds
-      .split(',')
-      .map(id => id.trim())
-      .filter(id => id)
-      .map(id => {
-        const user = users.find(u => u.id === id);
-        return user ? { employee_id: id, employee_name: user.name } : null;
-      })
-      .filter(Boolean);
+  const saveShiftForm = () => {
+    const assignments = shiftForm.selectedEmployees.map(employeeId => {
+      const user = users.find(u => u.id === employeeId);
+      return { employee_id: employeeId, employee_name: user.name };
+    });
 
     const updatedShifts = [...(schedule?.shifts || [])];
-    const existingIndex = updatedShifts.findIndex(s => s.date === dateStr);
+    const existingIndex = updatedShifts.findIndex(s => s.date === editingDay);
 
     const newShift = {
-      date: dateStr,
-      type: newType,
+      date: editingDay,
+      type: shiftForm.type,
       assignments,
-      hours: newType === 'custom' ? hours : null
+      hours: shiftForm.type === 'custom' ? shiftForm.hours : null
     };
 
     if (existingIndex >= 0) {
@@ -270,6 +265,12 @@ function App() {
     }
 
     saveSchedule(updatedShifts);
+    setEditingDay(null);
+  };
+
+  const cancelShiftForm = () => {
+    setEditingDay(null);
+    setShiftForm({ type: 'day', hours: null, selectedEmployees: [] });
   };
 
   if (!user) {
