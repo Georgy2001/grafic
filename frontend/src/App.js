@@ -497,8 +497,17 @@ function App() {
         {currentView === 'users' && (
           <UsersManagement 
             users={users} 
+            stores={stores}
             onCreateUser={createUser} 
             onDeleteUser={deleteUser} 
+          />
+        )}
+
+        {currentView === 'stores' && (
+          <StoresManagement
+            stores={stores}
+            onCreateStore={createStore}
+            onDeleteStore={deleteStore}
           />
         )}
 
