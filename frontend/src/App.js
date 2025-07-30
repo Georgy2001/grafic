@@ -540,7 +540,15 @@ function App() {
         )}
 
         {currentView === 'stats' && (
-          <StatsView stats={myShifts.stats} shifts={myShifts.shifts} />
+          <StatsView 
+            stats={myShifts.stats} 
+            shifts={myShifts.shifts} 
+            onShiftEarningsUpdate={updateShiftEarnings}
+            user={user}
+            selectedStore={selectedStore}
+            apiCall={apiCall}
+            getMonthName={getMonthName}
+          />
         )}
       </main>
     </div>
