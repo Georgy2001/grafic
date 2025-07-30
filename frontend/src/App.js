@@ -216,61 +216,96 @@ function App() {
   };
 
   const [editingDay, setEditingDay] = useState(null);
-  const [shiftForm, setShiftForm] = useState({
-    type: 'day',
-    hours: null,
+  const [dayShiftForm, setDayShiftForm] = useState({
+    selectedEmployees: []
+  });
+  const [nightShiftForm, setNightShiftForm] = useState({
     selectedEmployees: []
   });
 
   const editDayShift = (dateStr) => {
-    const dayShift = schedule?.shifts?.find(s => s.date === dateStr) || {
-      date: dateStr,
-      type: 'day',
-      assignments: [],
-      hours: null
-    };
-
-    setShiftForm({
-      type: dayShift.type,
-      hours: dayShift.hours,
-      selectedEmployees: dayShift.assignments?.map(a => a.employee_id) || []
+    const daySchedule = schedule?.days?.find(d => d.date === dateStr);
+    
+    // Initialize day shift form
+    setDayShiftForm({
+      selectedEmployees: daySchedule?.day_shift?.assignments?.map(a => a.employee_id) || []
     });
+    
+    // Initialize night shift form  
+    setNightShiftForm({
+      selectedEmployees: daySchedule?.night_shift?.assignments?.map(a => a.employee_id) || []
+    });
+    
     setEditingDay(dateStr);
   };
 
   const saveShiftForm = () => {
-    const assignments = shiftForm.selectedEmployees.map(employeeId => {
+    const dayAssignments = dayShiftForm.selectedEmployees.map(employeeId => {
+      const user = users.find(u => u.id === employeeId);
+      return { employee_id: employeeId, employee_name: user.name };
+    });
+    
+    const nightAssignments = nightShiftForm.selectedEmployees.map(employeeId => {
       const user = users.find(u => u.id === employeeId);
       return { employee_id: employeeId, employee_name: user.name };
     });
 
-    const updatedShifts = [...(schedule?.shifts || [])];
-    const existingIndex = updatedShifts.findIndex(s => s.date === editingDay);
+    const updatedDays = [...(schedule?.days || [])];
+    const existingIndex = updatedDays.findIndex(d => d.date === editingDay);
 
-    const newShift = {
+    const newDaySchedule = {
       date: editingDay,
-      type: shiftForm.type,
-      assignments,
-      hours: shiftForm.type === 'custom' ? shiftForm.hours : null
+      day_shift: dayAssignments.length > 0 ? {
+        type: "day",
+        assignments: dayAssignments,
+        hours: null
+      } : null,
+      night_shift: nightAssignments.length > 0 ? {
+        type: "night", 
+        assignments: nightAssignments,
+        hours: null
+      } : null,
+      custom_shifts: []
     };
 
     if (existingIndex >= 0) {
-      if (assignments.length === 0) {
-        updatedShifts.splice(existingIndex, 1);
+      if (dayAssignments.length === 0 && nightAssignments.length === 0) {
+        updatedDays.splice(existingIndex, 1);
       } else {
-        updatedShifts[existingIndex] = newShift;
+        updatedDays[existingIndex] = newDaySchedule;
       }
-    } else if (assignments.length > 0) {
-      updatedShifts.push(newShift);
+    } else if (dayAssignments.length > 0 || nightAssignments.length > 0) {
+      updatedDays.push(newDaySchedule);
     }
 
-    saveSchedule(updatedShifts);
+    saveSchedule(updatedDays);
     setEditingDay(null);
   };
 
   const cancelShiftForm = () => {
     setEditingDay(null);
-    setShiftForm({ type: 'day', hours: null, selectedEmployees: [] });
+    setDayShiftForm({ selectedEmployees: [] });
+    setNightShiftForm({ selectedEmployees: [] });
+  };
+
+  const saveSchedule = async (days) => {
+    try {
+      setLoading(true);
+      await apiCall('/schedules', {
+        method: 'POST',
+        body: JSON.stringify({
+          month: selectedMonth,
+          year: selectedYear,
+          days
+        })
+      });
+      fetchSchedule();
+      alert('Расписание сохранено');
+    } catch (error) {
+      alert('Ошибка сохранения: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!user) {
