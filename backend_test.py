@@ -123,13 +123,16 @@ class ShiftScheduleAPITester:
         success, data = self.api_call('POST', '/auth/register', employee_data, 
                                     token=self.manager_token, expected_status=200)
         
+        # Debug output
+        print(f"DEBUG: Create employee response - Success: {success}, Data: {data}")
+        
         if success and 'user' in data:
             self.created_employee_id = data['user']['id']
             return self.log_test("Create Employee", True, 
                                f"- Created: {data['user']['name']} (ID: {self.created_employee_id})")
         else:
             return self.log_test("Create Employee", False, 
-                               f"- Error: {data.get('detail', 'Unknown error')}")
+                               f"- Error: {data.get('detail', data)}")
 
     def test_employee_login(self) -> bool:
         """Test login with created employee"""
