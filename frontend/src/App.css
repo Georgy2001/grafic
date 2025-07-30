@@ -420,20 +420,22 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 1rem;
+  padding: 2rem;
   overflow-y: auto;
 }
 
 .user-form {
   background: white !important;
-  border-radius: 0.5rem;
-  padding: 2.5rem !important;
-  width: 95% !important;
-  max-width: 900px !important;
-  min-width: 600px !important;
-  max-height: 90vh;
+  border-radius: 0.75rem;
+  padding: 3rem !important;
+  width: 90% !important;
+  max-width: 1000px !important;
+  min-width: 700px !important;
+  max-height: 85vh;
   overflow-y: auto;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  margin: auto;
 }
 
 .user-form form {
