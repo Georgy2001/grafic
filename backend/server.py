@@ -455,6 +455,9 @@ async def get_all_schedules(current_user: dict = Depends(get_current_user)):
 
 @app.get("/api/my-shifts/{store_id}/{year}/{month}")
 async def get_my_shifts(store_id: str, year: int, month: int, current_user: dict = Depends(get_current_user)):
+    # Установить ставки по умолчанию для просроченных смен
+    set_default_earnings_if_needed()
+    
     # Check access permissions
     if current_user["role"] != UserRole.MANAGER:
         user_store_ids = current_user.get("store_ids", [])
@@ -467,10 +470,10 @@ async def get_my_shifts(store_id: str, year: int, month: int, current_user: dict
         "month": month
     })
     if not schedule:
-        return {"shifts": [], "stats": {"total_shifts": 0, "day_shifts": 0, "night_shifts": 0, "total_hours": 0}}
+        return {"shifts": [], "stats": {"total_shifts": 0, "day_shifts": 0, "night_shifts": 0, "total_hours": 0, "total_earnings": 0}}
     
     my_shifts = []
-    stats = {"total_shifts": 0, "day_shifts": 0, "night_shifts": 0, "total_hours": 0}
+    stats = {"total_shifts": 0, "day_shifts": 0, "night_shifts": 0, "total_hours": 0, "total_earnings": 0}
     
     for day_schedule in schedule.get("days", []):
         date = day_schedule["date"]
@@ -480,15 +483,25 @@ async def get_my_shifts(store_id: str, year: int, month: int, current_user: dict
             day_shift = day_schedule["day_shift"]
             for assignment in day_shift.get("assignments", []):
                 if assignment["employee_id"] == current_user["id"]:
+                    earnings = assignment.get("earnings", None)
+                    can_edit = assignment.get("can_edit_earnings", True)
+                    if can_edit and earnings is None:
+                        can_edit = can_edit_earnings(date, current_user)
+                    
                     my_shifts.append({
                         "date": date,
                         "type": "day",
-                        "shift_data": day_shift
+                        "shift_data": day_shift,
+                        "earnings": earnings,
+                        "can_edit_earnings": can_edit,
+                        "assignment_index": day_shift["assignments"].index(assignment)
                     })
                     stats["total_shifts"] += 1
                     stats["day_shifts"] += 1
                     hours = day_shift.get("hours", 12)
                     stats["total_hours"] += hours
+                    if earnings:
+                        stats["total_earnings"] += earnings
                     break
         
         # Check night shift
@@ -496,29 +509,49 @@ async def get_my_shifts(store_id: str, year: int, month: int, current_user: dict
             night_shift = day_schedule["night_shift"]
             for assignment in night_shift.get("assignments", []):
                 if assignment["employee_id"] == current_user["id"]:
+                    earnings = assignment.get("earnings", None)
+                    can_edit = assignment.get("can_edit_earnings", True)
+                    if can_edit and earnings is None:
+                        can_edit = can_edit_earnings(date, current_user)
+                    
                     my_shifts.append({
                         "date": date,
                         "type": "night",
-                        "shift_data": night_shift
+                        "shift_data": night_shift,
+                        "earnings": earnings,
+                        "can_edit_earnings": can_edit,
+                        "assignment_index": night_shift["assignments"].index(assignment)
                     })
                     stats["total_shifts"] += 1
                     stats["night_shifts"] += 1
                     hours = night_shift.get("hours", 12)
                     stats["total_hours"] += hours
+                    if earnings:
+                        stats["total_earnings"] += earnings
                     break
         
         # Check custom shifts
         for custom_shift in day_schedule.get("custom_shifts", []):
             for assignment in custom_shift.get("assignments", []):
                 if assignment["employee_id"] == current_user["id"]:
+                    earnings = assignment.get("earnings", None)
+                    can_edit = assignment.get("can_edit_earnings", True)
+                    if can_edit and earnings is None:
+                        can_edit = can_edit_earnings(date, current_user)
+                    
                     my_shifts.append({
                         "date": date,
                         "type": "custom",
-                        "shift_data": custom_shift
+                        "shift_data": custom_shift,
+                        "earnings": earnings,
+                        "can_edit_earnings": can_edit,
+                        "assignment_index": custom_shift["assignments"].index(assignment)
                     })
                     stats["total_shifts"] += 1
                     hours = custom_shift.get("hours", 8)
                     stats["total_hours"] += hours
+                    if earnings:
+                        stats["total_earnings"] += earnings
                     break
     
     return {"shifts": my_shifts, "stats": stats}
