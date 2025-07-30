@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for Shift Schedule Manager
-Tests all API endpoints with proper authentication flow
+Backend API Testing for Shift Schedule Manager with Stores Support
+Tests all API endpoints including extended stores functionality
 """
 
 import requests
@@ -16,6 +16,8 @@ class ShiftScheduleAPITester:
         self.manager_token = None
         self.employee_token = None
         self.created_employee_id = None
+        self.created_store_id = None
+        self.default_store_id = None
         self.tests_run = 0
         self.tests_passed = 0
         self.session = requests.Session()
