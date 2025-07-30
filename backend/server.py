@@ -149,8 +149,9 @@ async def register_user(user_data: UserCreate, current_user: dict = Depends(requ
     
     users_collection.insert_one(new_user)
     
-    # Return user without password
-    new_user.pop("password")
+    # Return user without password and _id
+    new_user.pop("password", None)
+    new_user.pop("_id", None)
     return {"message": "User created successfully", "user": new_user}
 
 @app.post("/api/auth/login")
