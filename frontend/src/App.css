@@ -1396,6 +1396,16 @@ body {
     padding: 1rem;
   }
 
+  .calendar-header {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+  }
+  
+  .calendar-header-day {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.75rem;
+  }
+
   .calendar-grid {
     grid-template-columns: repeat(7, 1fr);
     gap: 1px;
