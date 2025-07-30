@@ -117,6 +117,14 @@ class ScheduleCreate(BaseModel):
     year: int
     days: List[DaySchedule]
 
+class EarningsUpdate(BaseModel):
+    earnings: float
+    
+class EarningsResponse(BaseModel):
+    success: bool
+    message: str
+    can_edit: bool
+
 # Utility functions
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
