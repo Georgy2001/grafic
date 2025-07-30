@@ -85,6 +85,10 @@ class UserLogin(BaseModel):
 class ShiftAssignment(BaseModel):
     employee_id: str
     employee_name: str
+    earnings: Optional[float] = None  # Заработок за смену в рублях
+    earnings_set_at: Optional[datetime] = None  # Когда была установлена ставка
+    earnings_set_by: Optional[str] = None  # Кто установил ставку (employee_id или "auto")
+    can_edit_earnings: Optional[bool] = True  # Может ли сотрудник редактировать ставку
 
 class Shift(BaseModel):
     type: ShiftType
