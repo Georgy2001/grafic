@@ -321,13 +321,17 @@ class ShiftScheduleAPITester:
                                "- Missing manager token, employee ID, or store ID")
             
         current_date = datetime.now()
+        # Create schedule with today's date and tomorrow's date for testing
+        today = current_date.strftime("%Y-%m-%d")
+        tomorrow = (current_date + timedelta(days=1)).strftime("%Y-%m-%d")
+        
         schedule_data = {
             "store_id": self.default_store_id,
             "month": current_date.month,
             "year": current_date.year,
             "days": [
                 {
-                    "date": f"{current_date.year}-{current_date.month:02d}-01",
+                    "date": today,  # Today's date for employee earnings test
                     "day_shift": {
                         "type": "day",
                         "assignments": [
@@ -341,7 +345,7 @@ class ShiftScheduleAPITester:
                     }
                 },
                 {
-                    "date": f"{current_date.year}-{current_date.month:02d}-02",
+                    "date": tomorrow,  # Tomorrow's date
                     "night_shift": {
                         "type": "night",
                         "assignments": [
