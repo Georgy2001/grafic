@@ -35,24 +35,19 @@ function App() {
     }
   };
 
-  // Проверка доступности даты для редактирования
-  const isDateEditable = (dateStr) => {
-    // Менеджеры могут редактировать любые даты
-    if (user?.role === 'manager') {
-      return true;
-    }
-
+  // Проверка является ли дата прошлой (для визуального обозначения)
+  const isDateInPast = (dateStr) => {
     const targetDate = new Date(dateStr);
     const now = new Date();
     
-    // Если дата в будущем - всегда доступна
+    // Если дата в будущем - не прошлая
     if (targetDate > now) {
-      return true;
+      return false;
     }
     
-    // Если это сегодня
+    // Если это сегодня - не прошлая
     if (targetDate.toDateString() === now.toDateString()) {
-      return true; // Сегодня всегда доступно
+      return false;
     }
     
     // Если это вчера, проверяем время окончания ночной смены
@@ -60,13 +55,13 @@ function App() {
     yesterday.setDate(yesterday.getDate() - 1);
     
     if (targetDate.toDateString() === yesterday.toDateString()) {
-      // Дата доступна до 9:00 утра следующего дня (сегодня)
+      // Дата считается прошлой после 9:00 утра следующего дня (сегодня)
       const currentHour = now.getHours();
-      return currentHour < SHIFT_CONFIG.night_shift.end;
+      return currentHour >= SHIFT_CONFIG.night_shift.end;
     }
     
-    // Все остальные прошлые даты недоступны
-    return false;
+    // Все остальные прошлые даты считаются прошлыми
+    return true;
   };
 
   useEffect(() => {
