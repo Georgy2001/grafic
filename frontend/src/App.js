@@ -919,6 +919,90 @@ const UsersManagement = ({ users, stores, onCreateUser, onDeleteUser }) => {
   );
 };
 
+const StoresManagement = ({ stores, onCreateStore, onDeleteStore }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({ name: '', address: '' });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onCreateStore(formData);
+    setFormData({ name: '', address: '' });
+    setShowForm(false);
+  };
+
+  return (
+    <div className="stores-container">
+      <div className="stores-header">
+        <h2>Управление точками продаж</h2>
+        <button className="add-store-btn" onClick={() => setShowForm(true)}>
+          <Plus size={18} />
+          Добавить точку продаж
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="store-form-overlay">
+          <div className="store-form">
+            <h3>Новая точка продаж</h3>
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                placeholder="Название точки продаж"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Адрес"
+                value={formData.address}
+                onChange={(e) => setFormData({...formData, address: e.target.value})}
+                required
+              />
+              <div className="form-actions">
+                <button type="button" onClick={() => setShowForm(false)}>Отмена</button>
+                <button type="submit">Создать</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <div className="stores-list">
+        {stores.map(store => (
+          <div key={store.id} className="store-card">
+            <div className="store-info">
+              <div className="store-icon">🏪</div>
+              <div>
+                <h4>{store.name}</h4>
+                <p>{store.address}</p>
+                <small>ID: {store.id}</small>
+                <small>Создано: {new Date(store.created_at).toLocaleDateString('ru-RU')}</small>
+              </div>
+            </div>
+            <button 
+              className="delete-store-btn"
+              onClick={() => {
+                if (window.confirm(`Удалить точку продаж "${store.name}"?`)) {
+                  onDeleteStore(store.id);
+                }
+              }}
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        ))}
+        {stores.length === 0 && (
+          <div className="empty-state">
+            <p>Нет точек продаж</p>
+            <p>Создайте первую точку продаж для начала работы</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const StatsView = ({ stats, shifts }) => {
   return (
     <div className="stats-container">
