@@ -1325,14 +1325,15 @@ body {
 
 /* Store Assignment in User Form */
 .store-assignment {
-  margin: 1rem 0;
+  margin: 1.5rem 0;
 }
 
 .store-assignment label {
   display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
   color: #374151;
+  font-size: 1.1rem;
 }
 
 .user-form .stores-list {
