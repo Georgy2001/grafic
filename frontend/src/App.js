@@ -402,11 +402,13 @@ function App() {
             {loading && <div className="loading">Загрузка...</div>}
             
             {editingDay && (
-              <ShiftEditForm
+              <DayShiftEditForm
                 date={editingDay}
                 users={users}
-                shiftForm={shiftForm}
-                setShiftForm={setShiftForm}
+                dayShiftForm={dayShiftForm}
+                setDayShiftForm={setDayShiftForm}
+                nightShiftForm={nightShiftForm}
+                setNightShiftForm={setNightShiftForm}
                 onSave={saveShiftForm}
                 onCancel={cancelShiftForm}
               />
