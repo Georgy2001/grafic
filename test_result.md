@@ -303,8 +303,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Deployment preparation"
-    - "Production configuration review"
+    - "Store Management API testing completed"
+    - "Store-specific schedule functionality validated"
+    - "Access control and permissions verified"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -312,3 +313,5 @@ test_plan:
 agent_communication:
     -agent: "main"
     -message: "Application exploration completed. Shift Schedule Manager app is fully functional with React frontend, FastAPI backend, and MongoDB. All services are running. Ready for deployment preparation."
+    -agent: "testing"
+    -message: "Comprehensive testing of stores functionality completed successfully. All 26 tests passed including: Store CRUD operations, access control, store-specific schedules, employee store assignments, and legacy format validation. Fixed one critical MongoDB ObjectId serialization issue in schedule creation. All extended functionality with stores support is working correctly."
