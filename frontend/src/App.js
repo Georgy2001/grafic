@@ -389,6 +389,12 @@ function App() {
                   <Users size={18} />
                   Сотрудники
                 </button>
+                <button 
+                  className={currentView === 'stores' ? 'nav-btn active' : 'nav-btn'}
+                  onClick={() => setCurrentView('stores')}
+                >
+                  🏪 Точки продаж
+                </button>
               </>
             ) : (
               <>
