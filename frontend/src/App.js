@@ -306,9 +306,10 @@ function App() {
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
       const daySchedule = schedule?.days?.find(d => d.date === dateStr);
+      const editable = isDateEditable(dateStr);
       
       days.push(
-        <div key={day} className="calendar-day">
+        <div key={day} className={`calendar-day ${!editable ? 'disabled' : ''}`}>
           <div className="day-header">
             <span className="day-number">{day}</span>
             <span className="day-week">{weekDays[(firstDay + day - 1) % 7]}</span>
@@ -346,10 +347,12 @@ function App() {
             </div>
           )}
           
-          {user?.role === 'manager' && (
+          {/* Edit button - show only if user is manager OR date is editable */}
+          {(user?.role === 'manager' || editable) && (
             <button 
               className="edit-day-btn"
               onClick={() => editDayShift(dateStr)}
+              disabled={!editable && user?.role !== 'manager'}
             >
               <Edit size={12} />
             </button>
