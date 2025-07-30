@@ -259,41 +259,53 @@ backend:
         -comment: "Employee management fully tested: User creation with store assignments, proper role-based access control, user deletion working correctly"
 
 frontend:
-  - task: "React Application"
+  - task: "React Application with Stores Support"
     implemented: true
-    working: true
+    working: false
     file: "frontend/src/App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        -working: true
+        -working: false
         -agent: "main"
-        -comment: "Complete React app with authentication, schedule management, and user interface"
+        -comment: "Extended React app with stores functionality: store selector, stores management interface, updated user creation with store assignment"
 
-  - task: "Calendar Interface"
+  - task: "Stores Management Interface"
     implemented: true
-    working: true
+    working: false
     file: "frontend/src/App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        -working: true
+        -working: false
         -agent: "main"
-        -comment: "Calendar grid view with month/year selection and shift assignments"
+        -comment: "Created stores management component with CRUD operations and responsive design"
 
-  - task: "User Management Interface"
+  - task: "Store-Specific Calendar Interface"
     implemented: true
-    working: true
+    working: false
     file: "frontend/src/App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        -working: true
+        -working: false
         -agent: "main"
-        -comment: "Employee creation and management interface for managers"
+        -comment: "Updated calendar view to work with selected store, added store selector to schedule header"
+
+  - task: "Enhanced User Management Interface"
+    implemented: true
+    working: false
+    file: "frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: false
+        -agent: "main"
+        -comment: "Extended user creation form to assign employees to specific stores with checkbox interface"
 
 metadata:
   created_by: "main_agent"
