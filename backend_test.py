@@ -76,6 +76,9 @@ class ShiftScheduleAPITester:
         
         success, data = self.api_call('POST', '/auth/login', login_data)
         
+        # Debug output
+        print(f"DEBUG: Login response - Success: {success}, Data: {data}")
+        
         if success and 'access_token' in data:
             self.manager_token = data['access_token']
             user_info = data.get('user', {})
@@ -83,7 +86,7 @@ class ShiftScheduleAPITester:
                                f"- Role: {user_info.get('role')}, Name: {user_info.get('name')}")
         else:
             return self.log_test("Manager Login", False, 
-                               f"- Error: {data.get('detail', 'Unknown error')}")
+                               f"- Error: {data.get('detail', data)}")
 
     def test_invalid_login(self) -> bool:
         """Test login with invalid credentials"""
