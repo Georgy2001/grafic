@@ -284,6 +284,33 @@ body {
   background: #f9fafb;
 }
 
+.calendar-day.disabled {
+  background: #f3f4f6;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.calendar-day.disabled .day-number {
+  color: #9ca3af;
+}
+
+.calendar-day.disabled .day-week {
+  color: #9ca3af;
+}
+
+.calendar-day.disabled .shift-info {
+  opacity: 0.5;
+}
+
+.calendar-day.disabled .employee-name {
+  color: #9ca3af;
+}
+
+.calendar-day.disabled .edit-day-btn {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 .day-header {
   display: flex;
   justify-content: space-between;
