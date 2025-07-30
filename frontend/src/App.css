@@ -395,6 +395,100 @@ body {
   opacity: 1;
 }
 
+/* Earnings buttons in calendar */
+.employee-assignment {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  margin-bottom: 0.125rem;
+}
+
+.employee-assignment .employee-name {
+  flex: 1;
+  font-size: 0.75rem;
+  color: #374151;
+  padding: 0.125rem 0.25rem;
+  background: #f3f4f6;
+  border-radius: 0.25rem;
+}
+
+.earnings-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.earnings-btn:hover:not(:disabled) {
+  background: #059669;
+  transform: scale(1.1);
+}
+
+.earnings-btn.disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.earnings-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Earnings Modal */
+.earnings-modal {
+  width: 400px;
+  max-width: 90vw;
+}
+
+.earnings-modal-info {
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.shift-info-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.shift-info-detail:last-child {
+  margin-bottom: 0;
+}
+
+.shift-label {
+  font-weight: 500;
+  color: #64748b;
+}
+
+.shift-value {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.earnings-hint {
+  color: #64748b;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
 /* Users Management */
 .users-container {
   background: rgba(255, 255, 255, 0.95);
