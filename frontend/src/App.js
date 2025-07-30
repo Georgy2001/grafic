@@ -862,6 +862,30 @@ const UsersManagement = ({ users, stores, onCreateUser, onDeleteUser }) => {
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
                 required
               />
+              
+              <div className="store-assignment">
+                <label>Назначить на точки продаж:</label>
+                <div className="stores-list">
+                  {stores.map(store => (
+                    <div 
+                      key={store.id} 
+                      className={formData.selectedStores.includes(store.id) ? 'store-item selected' : 'store-item'}
+                      onClick={() => toggleStore(store.id)}
+                    >
+                      <div className="store-checkbox">
+                        {formData.selectedStores.includes(store.id) ? '✓' : ''}
+                      </div>
+                      <div className="store-details">
+                        <span className="store-name">{store.name}</span>
+                        <span className="store-address">{store.address}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {stores.length === 0 && (
+                  <p className="no-stores">Нет точек продаж. Создайте точки на вкладке "Точки продаж".</p>
+                )}
+              </div>
               <div className="form-actions">
                 <button type="button" onClick={() => setShowForm(false)}>Отмена</button>
                 <button type="submit">Создать</button>
