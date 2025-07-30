@@ -313,5 +313,9 @@ test_plan:
 agent_communication:
     -agent: "main"
     -message: "Application exploration completed. Shift Schedule Manager app is fully functional with React frontend, FastAPI backend, and MongoDB. All services are running. Ready for deployment preparation."
+    -agent: "main"  
+    -message: "Successfully extended application with stores functionality. Added stores management, updated schedule system to work with stores, updated user system for store assignments. All backend tests passed (26/26)."
+    -agent: "deep_testing_backend_v2"
+    -message: "All backend APIs for stores functionality working correctly. Fixed MongoDB ObjectId serialization issue. 26 comprehensive tests passed covering stores management, access control, and schedule functionality. Extended functionality is fully operational."
     -agent: "testing"
     -message: "Comprehensive testing of stores functionality completed successfully. All 26 tests passed including: Store CRUD operations, access control, store-specific schedules, employee store assignments, and legacy format validation. Fixed one critical MongoDB ObjectId serialization issue in schedule creation. All extended functionality with stores support is working correctly."
