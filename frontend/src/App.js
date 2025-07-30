@@ -874,7 +874,15 @@ const UsersManagement = ({ users, stores, onCreateUser, onDeleteUser }) => {
 
       {showForm && (
         <div className="user-form-overlay">
-          <div className="user-form">
+          <div 
+            className="user-form" 
+            style={{
+              maxWidth: '900px',
+              minWidth: '600px',
+              width: '95%',
+              padding: '2.5rem'
+            }}
+          >
             <h3>Новый сотрудник</h3>
             <form onSubmit={handleSubmit}>
               <input
