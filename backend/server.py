@@ -160,6 +160,7 @@ async def login(credentials: UserLogin):
     
     access_token = create_access_token({"sub": user["id"], "role": user["role"]})
     user.pop("password", None)
+    user.pop("_id", None)  # Remove MongoDB ObjectId
     
     return {
         "access_token": access_token,
