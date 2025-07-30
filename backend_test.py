@@ -223,12 +223,15 @@ class ShiftScheduleAPITester:
         success, data = self.api_call('POST', '/schedules', schedule_data, 
                                     token=self.manager_token, expected_status=200)
         
+        # Debug output
+        print(f"DEBUG: Create schedule response - Success: {success}, Data: {data}")
+        
         if success and 'schedule' in data:
             return self.log_test("Create Schedule", True, 
                                f"- Created schedule with {len(data['schedule']['shifts'])} shifts")
         else:
             return self.log_test("Create Schedule", False, 
-                               f"- Error: {data.get('detail', 'Unknown error')}")
+                               f"- Error: {data.get('detail', data)}")
 
     def test_get_schedule(self) -> bool:
         """Test getting schedule"""
