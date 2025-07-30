@@ -431,7 +431,7 @@ body {
   width: 85% !important;
   max-width: 1200px !important;
   min-width: 800px !important;
-  max-height: 85vh;
+  max-height: 75vh;
   overflow-y: auto;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
   position: relative;
