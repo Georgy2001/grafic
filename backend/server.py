@@ -324,10 +324,16 @@ async def create_schedule(schedule_data: ScheduleCreate, current_user: dict = De
     
     if existing:
         schedules_collection.replace_one({"_id": existing["_id"]}, schedule)
-        return {"message": "Schedule updated successfully", "schedule": schedule}
+        # Return a clean copy without MongoDB _id
+        clean_schedule = schedule.copy()
+        clean_schedule.pop("_id", None)
+        return {"message": "Schedule updated successfully", "schedule": clean_schedule}
     else:
         schedules_collection.insert_one(schedule)
-        return {"message": "Schedule created successfully", "schedule": schedule}
+        # Return a clean copy without MongoDB _id
+        clean_schedule = schedule.copy()
+        clean_schedule.pop("_id", None)
+        return {"message": "Schedule created successfully", "schedule": clean_schedule}
 
 @app.get("/api/schedules/{store_id}/{year}/{month}")
 async def get_schedule(store_id: str, year: int, month: int, current_user: dict = Depends(get_current_user)):
