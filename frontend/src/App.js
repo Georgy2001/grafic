@@ -686,6 +686,64 @@ function App() {
           />
         )}
       </main>
+
+      {/* Модальное окно для ввода ставки в календаре */}
+      {showCalendarEarningsModal && selectedCalendarShift && (
+        <div className="modal-overlay">
+          <div className="modal-content earnings-modal">
+            <h3>Указать ставку</h3>
+            <div className="earnings-modal-info">
+              <div className="shift-info-detail">
+                <span className="shift-label">Сотрудник:</span>
+                <span className="shift-value">{selectedCalendarShift.employee_name}</span>
+              </div>
+              <div className="shift-info-detail">
+                <span className="shift-label">Дата:</span>
+                <span className="shift-value">{selectedCalendarShift.date}</span>
+              </div>
+              <div className="shift-info-detail">
+                <span className="shift-label">Смена:</span>
+                <span className="shift-value">
+                  {selectedCalendarShift.type === 'day' ? '☀️ Дневная' : '🌙 Ночная'}
+                </span>
+              </div>
+            </div>
+            <div className="form-group">
+              <label>Ставка (₽)</label>
+              <input
+                type="number"
+                min="0"
+                max="5000"
+                step="50"
+                value={calendarEarningsInput}
+                onChange={(e) => setCalendarEarningsInput(e.target.value)}
+                placeholder="Введите ставку (до 5000₽)"
+                autoFocus
+              />
+              <small className="earnings-hint">Максимальная ставка: 5000₽. По умолчанию: 2000₽</small>
+            </div>
+            <div className="modal-actions">
+              <button
+                className="btn-cancel"
+                onClick={() => {
+                  setShowCalendarEarningsModal(false);
+                  setSelectedCalendarShift(null);
+                  setCalendarEarningsInput('');
+                }}
+              >
+                Отмена
+              </button>
+              <button
+                className="btn-save"
+                onClick={submitCalendarEarnings}
+                disabled={!calendarEarningsInput || parseFloat(calendarEarningsInput) > 5000}
+              >
+                Сохранить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
