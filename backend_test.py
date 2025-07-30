@@ -805,6 +805,20 @@ class ShiftScheduleAPITester:
         self.test_get_schedule_legacy()
         self.test_get_my_shifts_legacy()
         
+        # Earnings system tests
+        print("\n💰 EARNINGS SYSTEM TESTS")
+        print("-" * 30)
+        self.test_my_shifts_includes_earnings_fields()
+        self.test_update_shift_earnings_as_manager()
+        self.test_update_shift_earnings_as_employee_recent()
+        self.test_update_shift_earnings_as_employee_old()
+        self.test_update_earnings_nonexistent_shift()
+        self.test_employee_access_unassigned_store_earnings()
+        self.test_get_earnings_history()
+        self.test_get_earnings_history_unassigned_store()
+        self.test_manager_get_earnings_history()
+        self.test_automatic_default_earnings_setting()
+        
         # Cleanup
         print("\n🧹 CLEANUP TESTS")
         print("-" * 30)
