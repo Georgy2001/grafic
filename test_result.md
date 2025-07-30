@@ -331,3 +331,31 @@ agent_communication:
     -message: "All backend APIs for stores functionality working correctly. Fixed MongoDB ObjectId serialization issue. 26 comprehensive tests passed covering stores management, access control, and schedule functionality. Extended functionality is fully operational."
     -agent: "testing"
     -message: "Comprehensive testing of stores functionality completed successfully. All 26 tests passed including: Store CRUD operations, access control, store-specific schedules, employee store assignments, and legacy format validation. Fixed one critical MongoDB ObjectId serialization issue in schedule creation. All extended functionality with stores support is working correctly."
+    -agent: "main"
+    -message: "🚀 MAJOR UPDATE: Added comprehensive earnings system to shift schedule app! 
+
+✅ IMPLEMENTED FEATURES:
+1. **Fixed user form** - made wider (700px instead of 500px) for better UX
+2. **Earnings tracking system** - employees can set their daily earnings by clicking on shifts
+3. **Auto-default mechanism** - sets 2000₽ automatically if not entered within 12 hours
+4. **Manager override** - managers can edit earnings anytime, employees only within 12 hours
+5. **Enhanced statistics** - now shows total monthly earnings alongside shifts/hours
+6. **Historical earnings view** - employees can view past months earnings with detailed breakdown
+7. **Interactive shift interface** - click on shifts to enter earnings with visual feedback
+
+✅ BACKEND CHANGES:
+- Extended ShiftAssignment model with earnings fields (earnings, earnings_set_at, earnings_set_by, can_edit_earnings)
+- Added automatic default earnings setting function (2000₽ after 12 hours)
+- New API endpoints: PUT /shift-earnings/... and GET /earnings-history/...
+- Enhanced my-shifts endpoint with earnings data and edit permissions
+- Added EarningsUpdate and EarningsResponse models
+
+✅ FRONTEND CHANGES:  
+- Completely redesigned StatsView with earnings card and history button
+- Added interactive shift clicking for earnings input
+- Created earnings modal with validation and user feedback
+- Added earnings history modal showing monthly breakdown
+- Enhanced shift items with earnings display and edit indicators
+- New CSS styling for earnings-related components
+
+Ready for testing! The system now supports full earnings lifecycle from input to historical analysis."
