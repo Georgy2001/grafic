@@ -307,24 +307,6 @@ function App() {
     setNightShiftForm({ selectedEmployees: [] });
   };
 
-  const saveSchedule = async (days) => {
-    try {
-      setLoading(true);
-      await apiCall('/schedules', {
-        method: 'POST',
-        body: JSON.stringify({
-          month: selectedMonth,
-          year: selectedYear,
-          days
-        })
-      });
-      fetchSchedule();
-      alert('Расписание сохранено');
-    } catch (error) {
-      alert('Ошибка сохранения: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
   };
 
   if (!user) {
