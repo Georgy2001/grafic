@@ -1352,22 +1352,22 @@ body {
 
 /* Store Assignment in User Form */
 .store-assignment {
-  margin: 2rem 0;
+  margin: 1.5rem 0;
 }
 
 .store-assignment label {
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   font-weight: 600;
   color: #374151;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .no-stores {
   text-align: center;
   color: #6b7280;
   font-style: italic;
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
 .user-form .stores-list {
