@@ -209,7 +209,7 @@ async def create_schedule(schedule_data: ScheduleCreate, current_user: dict = De
         "id": schedule_id,
         "month": schedule_data.month,
         "year": schedule_data.year,
-        "shifts": [shift.dict() for shift in schedule_data.shifts],
+        "days": [day.dict() for day in schedule_data.days],
         "created_by": current_user["id"],
         "updated_at": datetime.now()
     }
@@ -244,24 +244,54 @@ async def get_my_shifts(year: int, month: int, current_user: dict = Depends(get_
     my_shifts = []
     stats = {"total_shifts": 0, "day_shifts": 0, "night_shifts": 0, "total_hours": 0}
     
-    for shift in schedule.get("shifts", []):
-        for assignment in shift.get("assignments", []):
-            if assignment["employee_id"] == current_user["id"]:
-                my_shifts.append(shift)
-                stats["total_shifts"] += 1
-                if shift["type"] == "day":
+    for day_schedule in schedule.get("days", []):
+        date = day_schedule["date"]
+        
+        # Check day shift
+        if day_schedule.get("day_shift"):
+            day_shift = day_schedule["day_shift"]
+            for assignment in day_shift.get("assignments", []):
+                if assignment["employee_id"] == current_user["id"]:
+                    my_shifts.append({
+                        "date": date,
+                        "type": "day",
+                        "shift_data": day_shift
+                    })
+                    stats["total_shifts"] += 1
                     stats["day_shifts"] += 1
-                elif shift["type"] == "night":
-                    stats["night_shifts"] += 1
-                
-                hours = shift.get("hours")
-                if hours:
+                    hours = day_shift.get("hours", 12)
                     stats["total_hours"] += hours
-                elif shift["type"] == "day":
-                    stats["total_hours"] += 12
-                elif shift["type"] == "night":
-                    stats["total_hours"] += 12
-                break
+                    break
+        
+        # Check night shift
+        if day_schedule.get("night_shift"):
+            night_shift = day_schedule["night_shift"]
+            for assignment in night_shift.get("assignments", []):
+                if assignment["employee_id"] == current_user["id"]:
+                    my_shifts.append({
+                        "date": date,
+                        "type": "night",
+                        "shift_data": night_shift
+                    })
+                    stats["total_shifts"] += 1
+                    stats["night_shifts"] += 1
+                    hours = night_shift.get("hours", 12)
+                    stats["total_hours"] += hours
+                    break
+        
+        # Check custom shifts
+        for custom_shift in day_schedule.get("custom_shifts", []):
+            for assignment in custom_shift.get("assignments", []):
+                if assignment["employee_id"] == current_user["id"]:
+                    my_shifts.append({
+                        "date": date,
+                        "type": "custom",
+                        "shift_data": custom_shift
+                    })
+                    stats["total_shifts"] += 1
+                    hours = custom_shift.get("hours", 8)
+                    stats["total_hours"] += hours
+                    break
     
     return {"shifts": my_shifts, "stats": stats}
 
