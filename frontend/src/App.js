@@ -178,7 +178,7 @@ function App() {
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-      const dayShift = schedule?.shifts?.find(s => s.date === dateStr);
+      const daySchedule = schedule?.days?.find(d => d.date === dateStr);
       
       days.push(
         <div key={day} className="calendar-day">
@@ -186,13 +186,15 @@ function App() {
             <span className="day-number">{day}</span>
             <span className="day-week">{weekDays[(firstDay + day - 1) % 7]}</span>
           </div>
-          {dayShift && (
+          
+          {/* Day Shift */}
+          {daySchedule?.day_shift && (
             <div className="shift-info">
-              <div className={`shift-type shift-${dayShift.type}`}>
-                {dayShift.type === 'day' ? '☀️ День' : dayShift.type === 'night' ? '🌙 Ночь' : '⏰ ' + dayShift.hours + 'ч'}
+              <div className="shift-type shift-day">
+                ☀️ День
               </div>
               <div className="shift-employees">
-                {dayShift.assignments?.map((assignment, idx) => (
+                {daySchedule.day_shift.assignments?.map((assignment, idx) => (
                   <div key={idx} className="employee-name">
                     {assignment.employee_name}
                   </div>
@@ -200,6 +202,23 @@ function App() {
               </div>
             </div>
           )}
+          
+          {/* Night Shift */}
+          {daySchedule?.night_shift && (
+            <div className="shift-info">
+              <div className="shift-type shift-night">
+                🌙 Ночь
+              </div>
+              <div className="shift-employees">
+                {daySchedule.night_shift.assignments?.map((assignment, idx) => (
+                  <div key={idx} className="employee-name">
+                    {assignment.employee_name}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
           {user?.role === 'manager' && (
             <button 
               className="edit-day-btn"
