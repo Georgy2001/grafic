@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Протестировать расширенную функциональность приложения 'График Смен' с поддержкой точек продаж"
+user_problem_statement: "Протестировать расширенную систему заработка в приложении График Смен"
 
 backend:
   - task: "Backend API Health Check"
@@ -257,6 +257,96 @@ backend:
         -working: true
         -agent: "testing"
         -comment: "Employee management fully tested: User creation with store assignments, proper role-based access control, user deletion working correctly"
+
+  - task: "Earnings System API Endpoints"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "New earnings API endpoints implemented: PUT /api/shift-earnings/{store_id}/{year}/{month}/{date}/{shift_type} and GET /api/earnings-history/{store_id}"
+        -working: true
+        -agent: "testing"
+        -comment: "All earnings API endpoints fully tested and working: PUT endpoint correctly updates earnings with proper access control and time restrictions, GET endpoint returns earnings history with proper filtering"
+
+  - task: "Enhanced My-Shifts Endpoint with Earnings"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Updated /api/my-shifts endpoint to include earnings, can_edit_earnings, and assignment_index fields"
+        -working: true
+        -agent: "testing"
+        -comment: "Enhanced my-shifts endpoint working correctly: Returns earnings data, can_edit_earnings flags, assignment_index, and total_earnings in statistics. All new fields properly populated"
+
+  - task: "Time-Based Earnings Edit Restrictions"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented 12-hour time restriction for employee earnings editing, managers can edit anytime"
+        -working: true
+        -agent: "testing"
+        -comment: "Time restrictions working perfectly: Employees can edit earnings within 12 hours of shift, managers can edit anytime, proper error messages for expired edit windows"
+
+  - task: "Automatic Default Earnings Setting"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Automatic 2000₽ default earnings setting for shifts older than 12 hours without earnings"
+        -working: true
+        -agent: "testing"
+        -comment: "Automatic default earnings system working: Function set_default_earnings_if_needed() properly sets 2000₽ for expired shifts, called automatically on my-shifts endpoint"
+
+  - task: "Earnings History API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "GET /api/earnings-history/{store_id} endpoint for viewing historical earnings by month"
+        -working: true
+        -agent: "testing"
+        -comment: "Earnings history API fully functional: Returns monthly earnings breakdown with total_earnings, total_shifts, and average_per_shift. Proper access control for employees and managers"
+
+  - task: "Earnings Access Control"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Store-based access control for earnings operations"
+        -working: true
+        -agent: "testing"
+        -comment: "Earnings access control working correctly: Employees can only access earnings for assigned stores (403 errors for unassigned stores), managers can access all stores"
 
 frontend:
   - task: "React Application with Stores Support"
