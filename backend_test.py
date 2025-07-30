@@ -464,10 +464,10 @@ class ShiftScheduleAPITester:
         return self.log_test("Delete Store", success, 
                            f"- {data.get('message', data.get('detail', 'Unknown result'))}")
 
-    def test_create_schedule(self) -> bool:
-        """Test creating a schedule"""
+    def test_create_schedule_legacy(self) -> bool:
+        """Test creating a schedule (legacy format - should fail without store_id)"""
         if not self.manager_token or not self.created_employee_id:
-            return self.log_test("Create Schedule", False, "- Missing manager token or employee ID")
+            return self.log_test("Create Schedule (Legacy)", False, "- Missing manager token or employee ID")
             
         current_date = datetime.now()
         schedule_data = {
@@ -485,72 +485,39 @@ class ShiftScheduleAPITester:
                     ],
                     "hours": None,
                     "notes": "Test shift"
-                },
-                {
-                    "date": f"{current_date.year}-{current_date.month:02d}-02",
-                    "type": "night",
-                    "assignments": [
-                        {
-                            "employee_id": self.created_employee_id,
-                            "employee_name": "Test Employee"
-                        }
-                    ],
-                    "hours": None,
-                    "notes": "Night shift test"
                 }
             ]
         }
         
         success, data = self.api_call('POST', '/schedules', schedule_data, 
-                                    token=self.manager_token, expected_status=200)
+                                    token=self.manager_token, expected_status=422)
         
-        # Debug output
-        print(f"DEBUG: Create schedule response - Success: {success}, Data: {data}")
-        
-        if success and 'schedule' in data:
-            return self.log_test("Create Schedule", True, 
-                               f"- Created schedule with {len(data['schedule']['shifts'])} shifts")
-        else:
-            return self.log_test("Create Schedule", False, 
-                               f"- Error: {data.get('detail', data)}")
+        return self.log_test("Create Schedule (Legacy)", success, 
+                           f"- Correctly rejected legacy format: {data.get('detail', 'No error')}")
 
-    def test_get_schedule(self) -> bool:
-        """Test getting schedule"""
+    def test_get_schedule_legacy(self) -> bool:
+        """Test getting schedule (legacy format - should fail without store_id)"""
         if not self.manager_token:
-            return self.log_test("Get Schedule", False, "- No manager token available")
+            return self.log_test("Get Schedule (Legacy)", False, "- No manager token available")
             
         current_date = datetime.now()
         success, data = self.api_call('GET', f'/schedules/{current_date.year}/{current_date.month}', 
-                                    token=self.manager_token)
+                                    token=self.manager_token, expected_status=404)
         
-        if success and 'schedule' in data:
-            schedule = data['schedule']
-            if schedule:
-                return self.log_test("Get Schedule", True, 
-                                   f"- Found schedule with {len(schedule.get('shifts', []))} shifts")
-            else:
-                return self.log_test("Get Schedule", True, "- No schedule found (empty)")
-        else:
-            return self.log_test("Get Schedule", False, 
-                               f"- Error: {data.get('detail', 'Unknown error')}")
+        return self.log_test("Get Schedule (Legacy)", success, 
+                           f"- Correctly rejected legacy format: {data.get('detail', 'Not Found')}")
 
-    def test_get_my_shifts(self) -> bool:
-        """Test getting employee's shifts"""
+    def test_get_my_shifts_legacy(self) -> bool:
+        """Test getting employee's shifts (legacy format - should fail without store_id)"""
         if not self.employee_token:
-            return self.log_test("Get My Shifts", False, "- No employee token available")
+            return self.log_test("Get My Shifts (Legacy)", False, "- No employee token available")
             
         current_date = datetime.now()
         success, data = self.api_call('GET', f'/my-shifts/{current_date.year}/{current_date.month}', 
-                                    token=self.employee_token)
+                                    token=self.employee_token, expected_status=404)
         
-        if success and 'shifts' in data and 'stats' in data:
-            shifts = data['shifts']
-            stats = data['stats']
-            return self.log_test("Get My Shifts", True, 
-                               f"- Found {len(shifts)} shifts, Total hours: {stats.get('total_hours', 0)}")
-        else:
-            return self.log_test("Get My Shifts", False, 
-                               f"- Error: {data.get('detail', 'Unknown error')}")
+        return self.log_test("Get My Shifts (Legacy)", success, 
+                           f"- Correctly rejected legacy format: {data.get('detail', 'Not Found')}")
 
     def test_delete_employee(self) -> bool:
         """Test deleting the created employee"""
