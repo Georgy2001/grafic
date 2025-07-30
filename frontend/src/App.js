@@ -188,11 +188,13 @@ function App() {
   };
 
   const saveSchedule = async (days) => {
+    if (!selectedStore) return;
     try {
       setLoading(true);
       await apiCall('/schedules', {
         method: 'POST',
         body: JSON.stringify({
+          store_id: selectedStore.id,
           month: selectedMonth,
           year: selectedYear,
           days
