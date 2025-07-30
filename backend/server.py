@@ -154,6 +154,85 @@ def require_manager(current_user: dict = Depends(get_current_user)):
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.now()}
 
+# Store Management Routes
+@app.post("/api/stores")
+async def create_store(store_data: StoreCreate, current_user: dict = Depends(require_manager)):
+    """Create a new store"""
+    store_id = str(uuid.uuid4())
+    
+    new_store = {
+        "id": store_id,
+        "name": store_data.name,
+        "address": store_data.address,
+        "created_at": datetime.now(),
+        "is_active": True
+    }
+    
+    stores_collection.insert_one(new_store)
+    new_store.pop("_id", None)
+    return {"message": "Store created successfully", "store": new_store}
+
+@app.get("/api/stores")
+async def get_stores(current_user: dict = Depends(get_current_user)):
+    """Get all stores or user's assigned stores"""
+    if current_user["role"] == UserRole.MANAGER:
+        # Managers can see all stores
+        stores = list(stores_collection.find({"is_active": True}, {"_id": 0}))
+    else:
+        # Employees see only their assigned stores
+        user_store_ids = current_user.get("store_ids", [])
+        if user_store_ids:
+            stores = list(stores_collection.find({
+                "id": {"$in": user_store_ids}, 
+                "is_active": True
+            }, {"_id": 0}))
+        else:
+            stores = []
+    
+    return stores
+
+@app.get("/api/stores/{store_id}")
+async def get_store(store_id: str, current_user: dict = Depends(get_current_user)):
+    """Get specific store details"""
+    # Check access permissions
+    if current_user["role"] != UserRole.MANAGER:
+        user_store_ids = current_user.get("store_ids", [])
+        if store_id not in user_store_ids:
+            raise HTTPException(status_code=403, detail="Access denied to this store")
+    
+    store = stores_collection.find_one({"id": store_id}, {"_id": 0})
+    if not store:
+        raise HTTPException(status_code=404, detail="Store not found")
+    
+    return store
+
+@app.put("/api/stores/{store_id}")
+async def update_store(store_id: str, store_data: StoreUpdate, current_user: dict = Depends(require_manager)):
+    """Update store information"""
+    update_data = {k: v for k, v in store_data.dict().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No data to update")
+    
+    update_data["updated_at"] = datetime.now()
+    
+    result = stores_collection.update_one({"id": store_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Store not found")
+    
+    return {"message": "Store updated successfully"}
+
+@app.delete("/api/stores/{store_id}")
+async def delete_store(store_id: str, current_user: dict = Depends(require_manager)):
+    """Soft delete store (set is_active to False)"""
+    result = stores_collection.update_one(
+        {"id": store_id}, 
+        {"$set": {"is_active": False, "updated_at": datetime.now()}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Store not found")
+    
+    return {"message": "Store deleted successfully"}
+
 @app.post("/api/auth/register")
 async def register_user(user_data: UserCreate, current_user: dict = Depends(require_manager)):
     # Check if user already exists
