@@ -9,6 +9,8 @@ function App() {
   const [currentView, setCurrentView] = useState('login');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedStore, setSelectedStore] = useState(null); // Selected store for viewing schedule
+  const [stores, setStores] = useState([]); // Available stores
   const [schedule, setSchedule] = useState(null);
   const [users, setUsers] = useState([]);
   const [myShifts, setMyShifts] = useState({ shifts: [], stats: {} });
