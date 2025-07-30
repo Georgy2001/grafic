@@ -307,8 +307,6 @@ function App() {
     setNightShiftForm({ selectedEmployees: [] });
   };
 
-  };
-
   if (!user) {
     return <LoginForm onLogin={login} loading={loading} />;
   }
