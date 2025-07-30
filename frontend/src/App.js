@@ -209,6 +209,34 @@ function App() {
     }
   };
 
+  const updateShiftEarnings = async (shift, earnings) => {
+    if (!selectedStore) return false;
+    
+    try {
+      const response = await apiCall(`/shift-earnings/${selectedStore.id}/${selectedYear}/${selectedMonth}/${shift.date}/${shift.type}?assignment_index=${shift.assignment_index || 0}`, {
+        method: 'PUT',
+        body: JSON.stringify({ earnings })
+      });
+
+      if (response.success) {
+        // Обновить данные смен
+        fetchMyShifts();
+        alert('Ставка успешно обновлена');
+        return true;
+      } else {
+        alert(response.message);
+        return false;
+      }
+    } catch (error) {
+      alert('Ошибка обновления ставки: ' + error.message);
+      return false;
+    }
+  };
+
+  const getMonthName = (monthNumber) => {
+    return months[monthNumber - 1] || '';
+  };
+
   const getDaysInMonth = (month, year) => {
     return new Date(year, month, 0).getDate();
   };
