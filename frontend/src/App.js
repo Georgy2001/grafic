@@ -347,12 +347,11 @@ function App() {
             </div>
           )}
           
-          {/* Edit button - show only if user is manager OR date is editable */}
-          {(user?.role === 'manager' || editable) && (
+          {/* Edit button - show for managers always, for employees only if editable */}
+          {(user?.role === 'manager' || (user?.role === 'employee' && editable)) && (
             <button 
               className="edit-day-btn"
               onClick={() => editDayShift(dateStr)}
-              disabled={!editable && user?.role !== 'manager'}
             >
               <Edit size={12} />
             </button>
