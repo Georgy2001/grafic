@@ -487,6 +487,117 @@ const LoginForm = ({ onLogin, loading }) => {
   );
 };
 
+const DayShiftEditForm = ({ date, users, dayShiftForm, setDayShiftForm, nightShiftForm, setNightShiftForm, onSave, onCancel }) => {
+  const toggleDayEmployee = (employeeId) => {
+    const isSelected = dayShiftForm.selectedEmployees.includes(employeeId);
+    if (isSelected) {
+      setDayShiftForm({
+        ...dayShiftForm,
+        selectedEmployees: dayShiftForm.selectedEmployees.filter(id => id !== employeeId)
+      });
+    } else {
+      setDayShiftForm({
+        ...dayShiftForm,
+        selectedEmployees: [...dayShiftForm.selectedEmployees, employeeId]
+      });
+    }
+  };
+
+  const toggleNightEmployee = (employeeId) => {
+    const isSelected = nightShiftForm.selectedEmployees.includes(employeeId);
+    if (isSelected) {
+      setNightShiftForm({
+        ...nightShiftForm,
+        selectedEmployees: nightShiftForm.selectedEmployees.filter(id => id !== employeeId)
+      });
+    } else {
+      setNightShiftForm({
+        ...nightShiftForm,
+        selectedEmployees: [...nightShiftForm.selectedEmployees, employeeId]
+      });
+    }
+  };
+
+  const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    weekday: 'long'
+  });
+
+  return (
+    <div className="shift-edit-overlay">
+      <div className="shift-edit-form">
+        <h3>Редактирование смен</h3>
+        <p className="edit-date">{formattedDate}</p>
+        
+        {/* Day Shift Section */}
+        <div className="form-section">
+          <label className="shift-section-label">
+            ☀️ Дневная смена (12 часов)
+          </label>
+          <div className="employees-list">
+            {users.map(user => (
+              <div 
+                key={user.id} 
+                className={dayShiftForm.selectedEmployees.includes(user.id) ? 'employee-item selected' : 'employee-item'}
+                onClick={() => toggleDayEmployee(user.id)}
+              >
+                <div className="employee-checkbox">
+                  {dayShiftForm.selectedEmployees.includes(user.id) ? '✓' : ''}
+                </div>
+                <div className="employee-details">
+                  <span className="employee-name">{user.name}</span>
+                  <span className="employee-email">{user.email}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          {users.length === 0 && (
+            <p className="no-employees">Нет сотрудников. Создайте сотрудников на вкладке "Сотрудники".</p>
+          )}
+        </div>
+
+        {/* Night Shift Section */}
+        <div className="form-section">
+          <label className="shift-section-label">
+            🌙 Ночная смена (12 часов)
+          </label>
+          <div className="employees-list">
+            {users.map(user => (
+              <div 
+                key={user.id} 
+                className={nightShiftForm.selectedEmployees.includes(user.id) ? 'employee-item selected' : 'employee-item'}
+                onClick={() => toggleNightEmployee(user.id)}
+              >
+                <div className="employee-checkbox">
+                  {nightShiftForm.selectedEmployees.includes(user.id) ? '✓' : ''}
+                </div>
+                <div className="employee-details">
+                  <span className="employee-name">{user.name}</span>
+                  <span className="employee-email">{user.email}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="form-actions">
+          <button type="button" onClick={onCancel} className="cancel-btn">
+            Отмена
+          </button>
+          <button 
+            type="button" 
+            onClick={onSave} 
+            className="save-btn"
+          >
+            Сохранить смены
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ShiftEditForm = ({ date, users, shiftForm, setShiftForm, onSave, onCancel }) => {
   const toggleEmployee = (employeeId) => {
     const isSelected = shiftForm.selectedEmployees.includes(employeeId);
