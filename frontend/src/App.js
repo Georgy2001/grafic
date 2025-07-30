@@ -866,73 +866,84 @@ const UsersManagement = ({ users, stores, onCreateUser, onDeleteUser }) => {
     <div className="users-container">
       <div className="users-header">
         <h2>Управление сотрудниками</h2>
-        <button className="add-user-btn" onClick={() => setShowForm(true)}>
+        <button className="add-user-btn" onClick={() => setShowForm(!showForm)}>
           <Plus size={18} />
-          Добавить сотрудника
+          {showForm ? 'Скрыть форму' : 'Добавить сотрудника'}
         </button>
       </div>
 
       {showForm && (
-        <div className="user-form-overlay">
-          <div 
-            className="user-form" 
-            style={{
-              maxWidth: '1200px',
-              minWidth: '800px',
-              width: '90vw',
-              padding: '1.5rem'
-            }}
-          >
+        <div className="inline-user-form">
+          <div className="form-card">
             <h3>Новый сотрудник</h3>
             <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                placeholder="Имя"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                required
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                required
-              />
-              <input
-                type="password"
-                placeholder="Пароль"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                required
-              />
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Имя</label>
+                  <input
+                    type="text"
+                    placeholder="Введите имя сотрудника"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    placeholder="Введите email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
               
-              <div className="store-assignment">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Пароль</label>
+                  <input
+                    type="password"
+                    placeholder="Введите пароль"
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="form-group">
                 <label>Назначить на точки продаж:</label>
-                <div className="stores-list">
+                <div className="inline-stores-list">
                   {stores.map(store => (
                     <div 
                       key={store.id} 
-                      className={formData.selectedStores.includes(store.id) ? 'store-item selected' : 'store-item'}
+                      className={`inline-store-item ${formData.selectedStores.includes(store.id) ? 'selected' : ''}`}
                       onClick={() => toggleStore(store.id)}
                     >
-                      <div className="store-checkbox">
+                      <div className="inline-store-checkbox">
                         {formData.selectedStores.includes(store.id) ? '✓' : ''}
                       </div>
-                      <div className="store-details">
-                        <span className="store-name">{store.name}</span>
-                        <span className="store-address">{store.address}</span>
+                      <div className="inline-store-details">
+                        <span className="inline-store-name">{store.name}</span>
+                        <span className="inline-store-address">{store.address}</span>
                       </div>
                     </div>
                   ))}
                 </div>
                 {stores.length === 0 && (
-                  <p className="no-stores">Нет точек продаж. Создайте точки на вкладке "Точки продаж".</p>
+                  <p className="no-stores-inline">Нет точек продаж. Создайте точки на вкладке "Точки продаж".</p>
                 )}
               </div>
-              <div className="form-actions">
-                <button type="button" onClick={() => setShowForm(false)}>Отмена</button>
-                <button type="submit">Создать</button>
+              
+              <div className="inline-form-actions">
+                <button type="button" className="cancel-btn" onClick={() => setShowForm(false)}>
+                  Отмена
+                </button>
+                <button type="submit" className="create-btn">
+                  Создать сотрудника
+                </button>
               </div>
             </form>
           </div>
