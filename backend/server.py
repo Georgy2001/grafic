@@ -556,6 +556,159 @@ async def get_my_shifts(store_id: str, year: int, month: int, current_user: dict
     
     return {"shifts": my_shifts, "stats": stats}
 
+@app.put("/api/shift-earnings/{store_id}/{year}/{month}/{date}/{shift_type}")
+async def update_shift_earnings(
+    store_id: str, 
+    year: int, 
+    month: int, 
+    date: str, 
+    shift_type: str,
+    earnings_data: EarningsUpdate,
+    assignment_index: int = 0,
+    current_user: dict = Depends(get_current_user)
+):
+    """Обновить ставку за смену"""
+    # Проверить доступ
+    if current_user["role"] != UserRole.MANAGER:
+        user_store_ids = current_user.get("store_ids", [])
+        if store_id not in user_store_ids:
+            raise HTTPException(status_code=403, detail="Access denied to this store")
+        
+        # Проверить временные ограничения для сотрудников
+        if not can_edit_earnings(date, current_user):
+            return EarningsResponse(
+                success=False, 
+                message="Время редактирования ставки истекло. Обратитесь к менеджеру.",
+                can_edit=False
+            )
+    
+    # Найти расписание
+    schedule = schedules_collection.find_one({
+        "store_id": store_id,
+        "year": year,
+        "month": month
+    })
+    
+    if not schedule:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    
+    # Найти день и смену
+    day_found = False
+    shift_found = False
+    
+    for day_schedule in schedule.get("days", []):
+        if day_schedule["date"] == date:
+            day_found = True
+            
+            # Определить тип смены и обновить
+            if shift_type == "day" and day_schedule.get("day_shift"):
+                shift = day_schedule["day_shift"]
+                if len(shift["assignments"]) > assignment_index:
+                    assignment = shift["assignments"][assignment_index]
+                    if assignment["employee_id"] == current_user["id"] or current_user["role"] == UserRole.MANAGER:
+                        assignment["earnings"] = earnings_data.earnings
+                        assignment["earnings_set_at"] = datetime.now()
+                        assignment["earnings_set_by"] = current_user["id"]
+                        assignment["can_edit_earnings"] = can_edit_earnings(date, current_user)
+                        shift_found = True
+                        
+            elif shift_type == "night" and day_schedule.get("night_shift"):
+                shift = day_schedule["night_shift"]
+                if len(shift["assignments"]) > assignment_index:
+                    assignment = shift["assignments"][assignment_index]
+                    if assignment["employee_id"] == current_user["id"] or current_user["role"] == UserRole.MANAGER:
+                        assignment["earnings"] = earnings_data.earnings
+                        assignment["earnings_set_at"] = datetime.now()
+                        assignment["earnings_set_by"] = current_user["id"]
+                        assignment["can_edit_earnings"] = can_edit_earnings(date, current_user)
+                        shift_found = True
+                        
+            elif shift_type == "custom":
+                custom_shifts = day_schedule.get("custom_shifts", [])
+                for custom_shift in custom_shifts:
+                    if len(custom_shift["assignments"]) > assignment_index:
+                        assignment = custom_shift["assignments"][assignment_index]
+                        if assignment["employee_id"] == current_user["id"] or current_user["role"] == UserRole.MANAGER:
+                            assignment["earnings"] = earnings_data.earnings
+                            assignment["earnings_set_at"] = datetime.now()
+                            assignment["earnings_set_by"] = current_user["id"]
+                            assignment["can_edit_earnings"] = can_edit_earnings(date, current_user)
+                            shift_found = True
+                            break
+            break
+    
+    if not day_found:
+        raise HTTPException(status_code=404, detail="Date not found in schedule")
+    
+    if not shift_found:
+        raise HTTPException(status_code=404, detail="Shift assignment not found")
+    
+    # Обновить расписание в базе данных
+    schedules_collection.update_one(
+        {"id": schedule["id"]},
+        {"$set": {"days": schedule["days"], "updated_at": datetime.now()}}
+    )
+    
+    can_edit = can_edit_earnings(date, current_user)
+    return EarningsResponse(
+        success=True, 
+        message="Ставка успешно обновлена",
+        can_edit=can_edit
+    )
+
+@app.get("/api/earnings-history/{store_id}")
+async def get_earnings_history(store_id: str, current_user: dict = Depends(get_current_user)):
+    """Получить историю заработка по месяцам"""
+    # Проверить доступ
+    if current_user["role"] != UserRole.MANAGER:
+        user_store_ids = current_user.get("store_ids", [])
+        if store_id not in user_store_ids:
+            raise HTTPException(status_code=403, detail="Access denied to this store")
+    
+    # Получить все расписания для данного магазина
+    schedules = schedules_collection.find({"store_id": store_id})
+    
+    history = []
+    
+    for schedule in schedules:
+        month_earnings = 0
+        month_shifts = 0
+        
+        for day_schedule in schedule.get("days", []):
+            # Проверить все смены
+            for shift_type in ["day_shift", "night_shift"]:
+                shift = day_schedule.get(shift_type)
+                if shift:
+                    for assignment in shift.get("assignments", []):
+                        if assignment["employee_id"] == current_user["id"]:
+                            earnings = assignment.get("earnings", 0)
+                            if earnings:
+                                month_earnings += earnings
+                                month_shifts += 1
+            
+            # Проверить custom_shifts
+            for custom_shift in day_schedule.get("custom_shifts", []):
+                for assignment in custom_shift.get("assignments", []):
+                    if assignment["employee_id"] == current_user["id"]:
+                        earnings = assignment.get("earnings", 0)
+                        if earnings:
+                            month_earnings += earnings
+                            month_shifts += 1
+        
+        if month_shifts > 0:
+            history.append({
+                "year": schedule["year"],
+                "month": schedule["month"],
+                "total_earnings": month_earnings,
+                "total_shifts": month_shifts,
+                "average_per_shift": round(month_earnings / month_shifts, 2) if month_shifts > 0 else 0
+            })
+    
+    # Сортировать по дате (новые сначала)
+    history.sort(key=lambda x: (x["year"], x["month"]), reverse=True)
+    
+    return {"history": history}
+
 # Initialize default manager account
 @app.on_event("startup")
 async def create_default_manager():
