@@ -565,8 +565,8 @@ class ShiftScheduleAPITester:
             return self.log_test("Update Earnings (Manager)", False, "- Missing required data")
             
         current_date = datetime.now()
-        # Use first day of current month for testing
-        test_date = f"{current_date.year}-{current_date.month:02d}-01"
+        # Use today's date for testing
+        test_date = current_date.strftime("%Y-%m-%d")
         
         earnings_data = {"earnings": 2500.0}
         
