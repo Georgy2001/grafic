@@ -68,24 +68,29 @@ class ShiftAssignment(BaseModel):
     employee_name: str
 
 class Shift(BaseModel):
-    date: str  # YYYY-MM-DD format
     type: ShiftType
     assignments: List[ShiftAssignment]
     hours: Optional[int] = None
     notes: Optional[str] = None
 
+class DaySchedule(BaseModel):
+    date: str  # YYYY-MM-DD format
+    day_shift: Optional[Shift] = None
+    night_shift: Optional[Shift] = None
+    custom_shifts: List[Shift] = []
+
 class Schedule(BaseModel):
     id: str
     month: int
     year: int
-    shifts: List[Shift]
+    days: List[DaySchedule]
     created_by: str
     updated_at: datetime
 
 class ScheduleCreate(BaseModel):
     month: int
     year: int
-    shifts: List[Shift]
+    days: List[DaySchedule]
 
 # Utility functions
 def hash_password(password: str) -> str:
