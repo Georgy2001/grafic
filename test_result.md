@@ -409,6 +409,18 @@ frontend:
         -agent: "testing"
         -comment: "✅ EMPLOYEE CREATION FORM FULLY TESTED AND WORKING PERFECTLY! Form is WIDE (965px), no horizontal scroll, all elements visible (title, name/email/password fields, store assignment section with 2 stores, Cancel/Create buttons). Successfully created 'Тестовый Работник' with email 'testworker@company.com', form closed after creation, employee appeared in list. All requirements met!"
 
+  - task: "New Functionality Testing - Login Page and User Permissions"
+    implemented: true
+    working: true
+    file: "frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "🎯 СПЕЦИАЛЬНОЕ ТЕСТИРОВАНИЕ НОВОЙ ФУНКЦИОНАЛЬНОСТИ ЗАВЕРШЕНО УСПЕШНО! Все 3 тестовых сценария пройдены: 1) Демо данные удалены со страницы входа, placeholder изменен на 'Введите email' 2) Менеджер имеет 31 кнопку редактирования, прошлые даты серые (29 дат) 3) Сотрудник НЕ имеет кнопок редактирования (0 кнопок), прошлые даты серые. Логика времени, разграничение прав и визуальные индикаторы работают корректно."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
