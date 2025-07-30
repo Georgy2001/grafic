@@ -186,6 +186,284 @@ class ShiftScheduleAPITester:
         return self.log_test("Get Users (Employee)", success, 
                            f"- Correctly forbidden: {data.get('detail', 'No error message')}")
 
+    # ===== STORE MANAGEMENT TESTS =====
+    
+    def test_get_default_stores(self) -> bool:
+        """Test getting default stores and capture default store ID"""
+        if not self.manager_token:
+            return self.log_test("Get Default Stores", False, "- No manager token available")
+            
+        success, data = self.api_call('GET', '/stores', token=self.manager_token)
+        
+        if success and isinstance(data, list) and len(data) > 0:
+            self.default_store_id = data[0]['id']  # Capture first store as default
+            return self.log_test("Get Default Stores", True, 
+                               f"- Found {len(data)} stores, default: {data[0]['name']}")
+        else:
+            return self.log_test("Get Default Stores", False, 
+                               f"- Error or no stores: {data}")
+
+    def test_create_store(self) -> bool:
+        """Test creating a new store"""
+        if not self.manager_token:
+            return self.log_test("Create Store", False, "- No manager token available")
+            
+        store_data = {
+            "name": f"Тестовая точка продаж {datetime.now().strftime('%H:%M:%S')}",
+            "address": "ул. Тестовая, 123"
+        }
+        
+        success, data = self.api_call('POST', '/stores', store_data, 
+                                    token=self.manager_token, expected_status=200)
+        
+        if success and 'store' in data:
+            self.created_store_id = data['store']['id']
+            return self.log_test("Create Store", True, 
+                               f"- Created: {data['store']['name']}")
+        else:
+            return self.log_test("Create Store", False, 
+                               f"- Error: {data.get('detail', data)}")
+
+    def test_get_all_stores_as_manager(self) -> bool:
+        """Test getting all stores as manager"""
+        if not self.manager_token:
+            return self.log_test("Get All Stores (Manager)", False, "- No manager token available")
+            
+        success, data = self.api_call('GET', '/stores', token=self.manager_token)
+        
+        if success and isinstance(data, list):
+            return self.log_test("Get All Stores (Manager)", True, 
+                               f"- Manager can see {len(data)} stores")
+        else:
+            return self.log_test("Get All Stores (Manager)", False, 
+                               f"- Error: {data.get('detail', data)}")
+
+    def test_get_stores_as_employee(self) -> bool:
+        """Test getting stores as employee (should only see assigned stores)"""
+        if not self.employee_token:
+            return self.log_test("Get Stores (Employee)", False, "- No employee token available")
+            
+        success, data = self.api_call('GET', '/stores', token=self.employee_token)
+        
+        if success and isinstance(data, list):
+            return self.log_test("Get Stores (Employee)", True, 
+                               f"- Employee can see {len(data)} assigned stores")
+        else:
+            return self.log_test("Get Stores (Employee)", False, 
+                               f"- Error: {data.get('detail', data)}")
+
+    def test_get_specific_store(self) -> bool:
+        """Test getting specific store details"""
+        if not self.manager_token or not self.created_store_id:
+            return self.log_test("Get Specific Store", False, "- Missing token or store ID")
+            
+        success, data = self.api_call('GET', f'/stores/{self.created_store_id}', 
+                                    token=self.manager_token)
+        
+        if success and 'name' in data:
+            return self.log_test("Get Specific Store", True, 
+                               f"- Retrieved: {data['name']}")
+        else:
+            return self.log_test("Get Specific Store", False, 
+                               f"- Error: {data.get('detail', data)}")
+
+    def test_update_store(self) -> bool:
+        """Test updating store information"""
+        if not self.manager_token or not self.created_store_id:
+            return self.log_test("Update Store", False, "- Missing token or store ID")
+            
+        update_data = {
+            "name": "Обновленная точка продаж",
+            "address": "ул. Обновленная, 456"
+        }
+        
+        success, data = self.api_call('PUT', f'/stores/{self.created_store_id}', 
+                                    update_data, token=self.manager_token)
+        
+        return self.log_test("Update Store", success, 
+                           f"- {data.get('message', data.get('detail', 'Unknown result'))}")
+
+    def test_employee_access_to_unassigned_store(self) -> bool:
+        """Test employee access to store they're not assigned to (should fail)"""
+        if not self.employee_token or not self.created_store_id:
+            return self.log_test("Employee Unassigned Store Access", False, 
+                               "- Missing employee token or created store ID")
+            
+        success, data = self.api_call('GET', f'/stores/{self.created_store_id}', 
+                                    token=self.employee_token, expected_status=403)
+        
+        return self.log_test("Employee Unassigned Store Access", success, 
+                           f"- Correctly forbidden: {data.get('detail', 'No error message')}")
+
+    def test_employee_access_to_assigned_store(self) -> bool:
+        """Test employee access to their assigned store"""
+        if not self.employee_token or not self.default_store_id:
+            return self.log_test("Employee Assigned Store Access", False, 
+                               "- Missing employee token or default store ID")
+            
+        success, data = self.api_call('GET', f'/stores/{self.default_store_id}', 
+                                    token=self.employee_token)
+        
+        if success and 'name' in data:
+            return self.log_test("Employee Assigned Store Access", True, 
+                               f"- Employee can access assigned store: {data['name']}")
+        else:
+            return self.log_test("Employee Assigned Store Access", False, 
+                               f"- Error: {data.get('detail', data)}")
+
+    # ===== STORE-SPECIFIC SCHEDULE TESTS =====
+
+    def test_create_schedule_for_store(self) -> bool:
+        """Test creating a schedule for specific store"""
+        if not self.manager_token or not self.created_employee_id or not self.default_store_id:
+            return self.log_test("Create Store Schedule", False, 
+                               "- Missing manager token, employee ID, or store ID")
+            
+        current_date = datetime.now()
+        schedule_data = {
+            "store_id": self.default_store_id,
+            "month": current_date.month,
+            "year": current_date.year,
+            "days": [
+                {
+                    "date": f"{current_date.year}-{current_date.month:02d}-01",
+                    "day_shift": {
+                        "type": "day",
+                        "assignments": [
+                            {
+                                "employee_id": self.created_employee_id,
+                                "employee_name": "Test Employee"
+                            }
+                        ],
+                        "hours": 8,
+                        "notes": "Test day shift"
+                    }
+                },
+                {
+                    "date": f"{current_date.year}-{current_date.month:02d}-02",
+                    "night_shift": {
+                        "type": "night",
+                        "assignments": [
+                            {
+                                "employee_id": self.created_employee_id,
+                                "employee_name": "Test Employee"
+                            }
+                        ],
+                        "hours": 12,
+                        "notes": "Test night shift"
+                    }
+                }
+            ]
+        }
+        
+        success, data = self.api_call('POST', '/schedules', schedule_data, 
+                                    token=self.manager_token, expected_status=200)
+        
+        if success and 'schedule' in data:
+            return self.log_test("Create Store Schedule", True, 
+                               f"- Created schedule for store with {len(data['schedule']['days'])} days")
+        else:
+            return self.log_test("Create Store Schedule", False, 
+                               f"- Error: {data.get('detail', data)}")
+
+    def test_create_schedule_for_nonexistent_store(self) -> bool:
+        """Test creating schedule for non-existent store (should fail)"""
+        if not self.manager_token or not self.created_employee_id:
+            return self.log_test("Schedule for Nonexistent Store", False, 
+                               "- Missing manager token or employee ID")
+            
+        current_date = datetime.now()
+        schedule_data = {
+            "store_id": "nonexistent-store-id",
+            "month": current_date.month,
+            "year": current_date.year,
+            "days": [
+                {
+                    "date": f"{current_date.year}-{current_date.month:02d}-01",
+                    "day_shift": {
+                        "type": "day",
+                        "assignments": [
+                            {
+                                "employee_id": self.created_employee_id,
+                                "employee_name": "Test Employee"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+        
+        success, data = self.api_call('POST', '/schedules', schedule_data, 
+                                    token=self.manager_token, expected_status=404)
+        
+        return self.log_test("Schedule for Nonexistent Store", success, 
+                           f"- Correctly rejected: {data.get('detail', 'No error message')}")
+
+    def test_get_store_schedule(self) -> bool:
+        """Test getting schedule for specific store"""
+        if not self.manager_token or not self.default_store_id:
+            return self.log_test("Get Store Schedule", False, "- Missing token or store ID")
+            
+        current_date = datetime.now()
+        success, data = self.api_call('GET', 
+                                    f'/schedules/{self.default_store_id}/{current_date.year}/{current_date.month}', 
+                                    token=self.manager_token)
+        
+        if success and 'schedule' in data:
+            schedule = data['schedule']
+            if schedule:
+                return self.log_test("Get Store Schedule", True, 
+                                   f"- Found schedule with {len(schedule.get('days', []))} days")
+            else:
+                return self.log_test("Get Store Schedule", True, "- No schedule found (empty)")
+        else:
+            return self.log_test("Get Store Schedule", False, 
+                               f"- Error: {data.get('detail', 'Unknown error')}")
+
+    def test_get_my_shifts_for_store(self) -> bool:
+        """Test getting employee's shifts for specific store"""
+        if not self.employee_token or not self.default_store_id:
+            return self.log_test("Get My Store Shifts", False, "- Missing employee token or store ID")
+            
+        current_date = datetime.now()
+        success, data = self.api_call('GET', 
+                                    f'/my-shifts/{self.default_store_id}/{current_date.year}/{current_date.month}', 
+                                    token=self.employee_token)
+        
+        if success and 'shifts' in data and 'stats' in data:
+            shifts = data['shifts']
+            stats = data['stats']
+            return self.log_test("Get My Store Shifts", True, 
+                               f"- Found {len(shifts)} shifts, Total hours: {stats.get('total_hours', 0)}")
+        else:
+            return self.log_test("Get My Store Shifts", False, 
+                               f"- Error: {data.get('detail', 'Unknown error')}")
+
+    def test_employee_access_unassigned_store_shifts(self) -> bool:
+        """Test employee accessing shifts for unassigned store (should fail)"""
+        if not self.employee_token or not self.created_store_id:
+            return self.log_test("Employee Unassigned Store Shifts", False, 
+                               "- Missing employee token or created store ID")
+            
+        current_date = datetime.now()
+        success, data = self.api_call('GET', 
+                                    f'/my-shifts/{self.created_store_id}/{current_date.year}/{current_date.month}', 
+                                    token=self.employee_token, expected_status=403)
+        
+        return self.log_test("Employee Unassigned Store Shifts", success, 
+                           f"- Correctly forbidden: {data.get('detail', 'No error message')}")
+
+    def test_delete_store(self) -> bool:
+        """Test deleting the created store"""
+        if not self.manager_token or not self.created_store_id:
+            return self.log_test("Delete Store", False, "- Missing manager token or store ID")
+            
+        success, data = self.api_call('DELETE', f'/stores/{self.created_store_id}', 
+                                    token=self.manager_token)
+        
+        return self.log_test("Delete Store", success, 
+                           f"- {data.get('message', data.get('detail', 'Unknown result'))}")
+
     def test_create_schedule(self) -> bool:
         """Test creating a schedule"""
         if not self.manager_token or not self.created_employee_id:
