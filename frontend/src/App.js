@@ -366,6 +366,17 @@ function App() {
             </div>
 
             {loading && <div className="loading">Загрузка...</div>}
+            
+            {editingDay && (
+              <ShiftEditForm
+                date={editingDay}
+                users={users}
+                shiftForm={shiftForm}
+                setShiftForm={setShiftForm}
+                onSave={saveShiftForm}
+                onCancel={cancelShiftForm}
+              />
+            )}
           </div>
         )}
 
