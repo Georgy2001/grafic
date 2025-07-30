@@ -1336,11 +1336,12 @@ body {
 }
 
 .user-form .stores-list {
-  max-height: 150px;
+  max-height: 200px;
   overflow-y: auto;
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
-  padding: 0.5rem;
+  padding: 1rem;
+  background: #f8fafc;
 }
 
 .store-item {
