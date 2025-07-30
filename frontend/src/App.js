@@ -1003,7 +1003,7 @@ const StoresManagement = ({ stores, onCreateStore, onDeleteStore }) => {
   );
 };
 
-const StatsView = ({ stats, shifts, onShiftEarningsUpdate }) => {
+const StatsView = ({ stats, shifts, onShiftEarningsUpdate, user, selectedStore, apiCall, getMonthName }) => {
   const [showEarningsModal, setShowEarningsModal] = useState(false);
   const [selectedShift, setSelectedShift] = useState(null);
   const [earningsInput, setEarningsInput] = useState('');
