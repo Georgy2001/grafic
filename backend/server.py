@@ -298,8 +298,14 @@ async def delete_user(user_id: str, current_user: dict = Depends(require_manager
 
 @app.post("/api/schedules")
 async def create_schedule(schedule_data: ScheduleCreate, current_user: dict = Depends(require_manager)):
-    # Check if schedule already exists for this month/year
+    # Validate that store exists
+    store = stores_collection.find_one({"id": schedule_data.store_id, "is_active": True})
+    if not store:
+        raise HTTPException(status_code=404, detail="Store not found")
+    
+    # Check if schedule already exists for this month/year/store
     existing = schedules_collection.find_one({
+        "store_id": schedule_data.store_id,
         "month": schedule_data.month,
         "year": schedule_data.year
     })
@@ -308,6 +314,7 @@ async def create_schedule(schedule_data: ScheduleCreate, current_user: dict = De
     
     schedule = {
         "id": schedule_id,
+        "store_id": schedule_data.store_id,
         "month": schedule_data.month,
         "year": schedule_data.year,
         "days": [day.dict() for day in schedule_data.days],
@@ -322,9 +329,19 @@ async def create_schedule(schedule_data: ScheduleCreate, current_user: dict = De
         schedules_collection.insert_one(schedule)
         return {"message": "Schedule created successfully", "schedule": schedule}
 
-@app.get("/api/schedules/{year}/{month}")
-async def get_schedule(year: int, month: int, current_user: dict = Depends(get_current_user)):
-    schedule = schedules_collection.find_one({"year": year, "month": month})
+@app.get("/api/schedules/{store_id}/{year}/{month}")
+async def get_schedule(store_id: str, year: int, month: int, current_user: dict = Depends(get_current_user)):
+    # Check access permissions
+    if current_user["role"] != UserRole.MANAGER:
+        user_store_ids = current_user.get("store_ids", [])
+        if store_id not in user_store_ids:
+            raise HTTPException(status_code=403, detail="Access denied to this store")
+    
+    schedule = schedules_collection.find_one({
+        "store_id": store_id,
+        "year": year, 
+        "month": month
+    })
     if not schedule:
         return {"schedule": None}
     
@@ -333,11 +350,23 @@ async def get_schedule(year: int, month: int, current_user: dict = Depends(get_c
 
 @app.get("/api/schedules")
 async def get_all_schedules(current_user: dict = Depends(get_current_user)):
-    schedules = list(schedules_collection.find({}, {"_id": 0}))
+    if current_user["role"] == UserRole.MANAGER:
+        # Managers can see all schedules
+        schedules = list(schedules_collection.find({}, {"_id": 0}))
+    else:
+        # Employees see only schedules from their assigned stores
+        user_store_ids = current_user.get("store_ids", [])
+        if user_store_ids:
+            schedules = list(schedules_collection.find({
+                "store_id": {"$in": user_store_ids}
+            }, {"_id": 0}))
+        else:
+            schedules = []
+    
     return {"schedules": schedules}
 
-@app.get("/api/my-shifts/{year}/{month}")
-async def get_my_shifts(year: int, month: int, current_user: dict = Depends(get_current_user)):
+@app.get("/api/my-shifts/{store_id}/{year}/{month}")
+async def get_my_shifts(store_id: str, year: int, month: int, current_user: dict = Depends(get_current_user)):
     schedule = schedules_collection.find_one({"year": year, "month": month})
     if not schedule:
         return {"shifts": [], "stats": {"total_shifts": 0, "day_shifts": 0, "night_shifts": 0, "total_hours": 0}}
