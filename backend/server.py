@@ -367,7 +367,17 @@ async def get_all_schedules(current_user: dict = Depends(get_current_user)):
 
 @app.get("/api/my-shifts/{store_id}/{year}/{month}")
 async def get_my_shifts(store_id: str, year: int, month: int, current_user: dict = Depends(get_current_user)):
-    schedule = schedules_collection.find_one({"year": year, "month": month})
+    # Check access permissions
+    if current_user["role"] != UserRole.MANAGER:
+        user_store_ids = current_user.get("store_ids", [])
+        if store_id not in user_store_ids:
+            raise HTTPException(status_code=403, detail="Access denied to this store")
+    
+    schedule = schedules_collection.find_one({
+        "store_id": store_id,
+        "year": year, 
+        "month": month
+    })
     if not schedule:
         return {"shifts": [], "stats": {"total_shifts": 0, "day_shifts": 0, "night_shifts": 0, "total_hours": 0}}
     
