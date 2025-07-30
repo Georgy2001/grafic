@@ -877,9 +877,9 @@ const UsersManagement = ({ users, stores, onCreateUser, onDeleteUser }) => {
           <div 
             className="user-form" 
             style={{
-              maxWidth: '1000px',
-              minWidth: '700px',
-              width: '90%',
+              maxWidth: '1200px',
+              minWidth: '800px',
+              width: '85vw',
               padding: '3rem'
             }}
           >
