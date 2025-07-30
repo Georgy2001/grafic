@@ -452,6 +452,20 @@ async def create_default_manager():
         }
         users_collection.insert_one(default_manager)
         print("Default manager created: manager@company.com / manager123")
+    
+    # Create default store if none exists
+    existing_store = stores_collection.find_one({"is_active": True})
+    if not existing_store:
+        store_id = str(uuid.uuid4())
+        default_store = {
+            "id": store_id,
+            "name": "Основная точка продаж",
+            "address": "ул. Примерная, 1",
+            "created_at": datetime.now(),
+            "is_active": True
+        }
+        stores_collection.insert_one(default_store)
+        print(f"Default store created: {default_store['name']}")
 
 if __name__ == "__main__":
     import uvicorn
