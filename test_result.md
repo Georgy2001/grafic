@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Подготовь данное приложение к развертыванию" (Prepare this application for deployment)
+user_problem_statement: "Протестировать расширенную функциональность приложения 'График Смен' с поддержкой точек продаж"
 
 backend:
   - task: "Backend API Health Check"
@@ -116,6 +116,9 @@ backend:
         -working: true
         -agent: "main"
         -comment: "Backend is running and responding to health checks at port 8001"
+        -working: true
+        -agent: "testing"
+        -comment: "Health check endpoint verified - backend responding correctly"
 
   - task: "User Authentication System"
     implemented: true
@@ -128,6 +131,102 @@ backend:
         -working: true
         -agent: "main"
         -comment: "JWT-based authentication with manager/employee roles implemented"
+        -working: true
+        -agent: "testing"
+        -comment: "Authentication system fully tested - manager login (manager@company.com/manager123), employee creation and login, invalid credentials rejection all working correctly"
+
+  - task: "Store Management API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Store management endpoints implemented with CRUD operations"
+        -working: true
+        -agent: "testing"
+        -comment: "All store management APIs tested successfully: POST /api/stores (create), GET /api/stores (list), GET /api/stores/{id} (get specific), PUT /api/stores/{id} (update), DELETE /api/stores/{id} (soft delete). Default store creation verified."
+
+  - task: "Store Access Control"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Access control implemented for store-specific operations"
+        -working: true
+        -agent: "testing"
+        -comment: "Store access control fully validated: Managers can access all stores, employees can only access assigned stores, proper 403 errors for unauthorized access attempts"
+
+  - task: "Employee Store Assignment"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Employee creation with store assignment functionality"
+        -working: true
+        -agent: "testing"
+        -comment: "Employee store assignment working correctly: Employees can be created with specific store_ids, they can only see and access their assigned stores"
+
+  - task: "Store-Specific Schedule Management"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Schedule management updated to work with specific stores"
+        -working: false
+        -agent: "testing"
+        -comment: "Schedule creation failing with 500 Internal Server Error due to MongoDB ObjectId serialization issue"
+        -working: true
+        -agent: "testing"
+        -comment: "Fixed MongoDB ObjectId serialization issue in create_schedule endpoint. All store-specific schedule operations now working: POST /api/schedules (with store_id), GET /api/schedules/{store_id}/{year}/{month}, validation for non-existent stores"
+
+  - task: "Personal Shifts by Store"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Employee personal shift viewing for specific stores"
+        -working: true
+        -agent: "testing"
+        -comment: "Personal shifts by store working correctly: GET /api/my-shifts/{store_id}/{year}/{month} returns employee shifts for specific store with proper access control and statistics"
+
+  - task: "Legacy Format Validation"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Validation to ensure old API formats are rejected"
+        -working: true
+        -agent: "testing"
+        -comment: "Legacy format validation working: Old schedule creation without store_id properly rejected with 422 errors, old schedule/shifts endpoints without store_id return 404 as expected"
 
   - task: "Schedule Management API"
     implemented: true
@@ -140,6 +239,9 @@ backend:
         -working: true
         -agent: "main"
         -comment: "Complete CRUD operations for schedule management"
+        -working: true
+        -agent: "testing"
+        -comment: "Schedule management fully tested and working with store-specific functionality"
 
   - task: "Employee Management API"
     implemented: true
@@ -152,6 +254,9 @@ backend:
         -working: true
         -agent: "main"
         -comment: "User registration, deletion and management endpoints"
+        -working: true
+        -agent: "testing"
+        -comment: "Employee management fully tested: User creation with store assignments, proper role-based access control, user deletion working correctly"
 
 frontend:
   - task: "React Application"
