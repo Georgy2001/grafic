@@ -22,6 +22,7 @@ client = MongoClient(MONGO_URL)
 db = client[DB_NAME]
 users_collection = db.users
 schedules_collection = db.schedules
+stores_collection = db.stores
 
 app = FastAPI(title="Shift Schedule Manager")
 
