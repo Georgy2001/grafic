@@ -155,8 +155,9 @@ function App() {
   };
 
   const fetchMyShifts = async () => {
+    if (!selectedStore) return;
     try {
-      const response = await apiCall(`/my-shifts/${selectedYear}/${selectedMonth}`);
+      const response = await apiCall(`/my-shifts/${selectedStore.id}/${selectedYear}/${selectedMonth}`);
       setMyShifts(response);
     } catch (error) {
       console.error('Error fetching my shifts:', error);
