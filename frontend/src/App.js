@@ -1003,10 +1003,54 @@ const StoresManagement = ({ stores, onCreateStore, onDeleteStore }) => {
   );
 };
 
-const StatsView = ({ stats, shifts }) => {
+const StatsView = ({ stats, shifts, onShiftEarningsUpdate }) => {
+  const [showEarningsModal, setShowEarningsModal] = useState(false);
+  const [selectedShift, setSelectedShift] = useState(null);
+  const [earningsInput, setEarningsInput] = useState('');
+  const [earningsHistory, setEarningsHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+
+  const handleShiftClick = (shift) => {
+    if (shift.can_edit_earnings || user?.role === 'manager') {
+      setSelectedShift(shift);
+      setEarningsInput(shift.earnings || '');
+      setShowEarningsModal(true);
+    }
+  };
+
+  const submitEarnings = async () => {
+    if (selectedShift && earningsInput) {
+      const success = await onShiftEarningsUpdate(selectedShift, parseFloat(earningsInput));
+      if (success) {
+        setShowEarningsModal(false);
+        setSelectedShift(null);
+        setEarningsInput('');
+      }
+    }
+  };
+
+  const fetchEarningsHistory = async () => {
+    try {
+      const response = await apiCall(`/earnings-history/${selectedStore?.id}`);
+      setEarningsHistory(response.history);
+      setShowHistory(true);
+    } catch (error) {
+      console.error('Error fetching earnings history:', error);
+    }
+  };
+
   return (
     <div className="stats-container">
-      <h2>Статистика за месяц</h2>
+      <div className="stats-header">
+        <h2>Статистика за месяц</h2>
+        <button 
+          className="history-btn"
+          onClick={fetchEarningsHistory}
+          title="Посмотреть историю заработка"
+        >
+          📊 История
+        </button>
+      </div>
       
       <div className="stats-grid">
         <div className="stat-card">
@@ -1040,19 +1084,140 @@ const StatsView = ({ stats, shifts }) => {
             <p>Часов работы</p>
           </div>
         </div>
+
+        <div className="stat-card earnings-card">
+          <div className="stat-icon">💰</div>
+          <div className="stat-info">
+            <h3>{stats.total_earnings ? `${stats.total_earnings.toLocaleString()}₽` : '0₽'}</h3>
+            <p>Общий заработок</p>
+          </div>
+        </div>
       </div>
 
       <div className="shifts-list">
         <h3>Мои смены</h3>
-        {shifts.map((shift, idx) => (
-          <div key={idx} className="shift-item">
-            <div className="shift-date">{shift.date}</div>
-            <div className={`shift-badge shift-${shift.type}`}>
-              {shift.type === 'day' ? '☀️ День' : shift.type === 'night' ? '🌙 Ночь' : `⏰ ${shift.hours}ч`}
+        {shifts.length === 0 ? (
+          <p className="no-shifts">Нет смен за этот месяц</p>
+        ) : (
+          shifts.map((shift, idx) => (
+            <div 
+              key={idx} 
+              className={`shift-item ${shift.can_edit_earnings ? 'clickable' : ''}`}
+              onClick={() => handleShiftClick(shift)}
+              title={shift.can_edit_earnings ? 'Нажмите для ввода ставки' : shift.earnings ? `Заработок: ${shift.earnings}₽` : 'Ставка не установлена'}
+            >
+              <div className="shift-main-info">
+                <div className="shift-date">{shift.date}</div>
+                <div className={`shift-badge shift-${shift.type}`}>
+                  {shift.type === 'day' ? '☀️ День' : 
+                   shift.type === 'night' ? '🌙 Ночь' : 
+                   `⏰ ${shift.shift_data?.hours || 8}ч`}
+                </div>
+              </div>
+              <div className="shift-earnings">
+                {shift.earnings ? (
+                  <span className="earnings-amount">{shift.earnings.toLocaleString()}₽</span>
+                ) : (
+                  <span className={`earnings-placeholder ${shift.can_edit_earnings ? 'editable' : ''}`}>
+                    {shift.can_edit_earnings ? '💰 Указать ставку' : '⏳ Ожидание'}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Модальное окно для ввода ставки */}
+      {showEarningsModal && selectedShift && (
+        <div className="earnings-modal-overlay">
+          <div className="earnings-modal">
+            <h3>Укажите заработок за смену</h3>
+            <div className="shift-details">
+              <p><strong>Дата:</strong> {selectedShift.date}</p>
+              <p><strong>Тип:</strong> {
+                selectedShift.type === 'day' ? 'Дневная смена' : 
+                selectedShift.type === 'night' ? 'Ночная смена' : 
+                'Пользовательская смена'
+              }</p>
+            </div>
+            <div className="earnings-input-group">
+              <label>Заработок (₽):</label>
+              <input
+                type="number"
+                min="0"
+                max="50000"
+                value={earningsInput}
+                onChange={(e) => setEarningsInput(e.target.value)}
+                placeholder="2000"
+                autoFocus
+              />
+            </div>
+            <div className="modal-actions">
+              <button 
+                type="button" 
+                onClick={() => setShowEarningsModal(false)}
+                className="cancel-btn"
+              >
+                Отмена
+              </button>
+              <button 
+                type="button" 
+                onClick={submitEarnings}
+                className="save-btn"
+                disabled={!earningsInput || parseFloat(earningsInput) < 0}
+              >
+                Сохранить
+              </button>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {/* Модальное окно истории заработка */}
+      {showHistory && (
+        <div className="earnings-modal-overlay">
+          <div className="earnings-modal history-modal">
+            <h3>История заработка</h3>
+            <div className="history-list">
+              {earningsHistory.length === 0 ? (
+                <p>Нет данных о заработке</p>
+              ) : (
+                earningsHistory.map((record, idx) => (
+                  <div key={idx} className="history-item">
+                    <div className="history-period">
+                      {getMonthName(record.month)} {record.year}
+                    </div>
+                    <div className="history-details">
+                      <div className="history-stat">
+                        <span className="label">Смен:</span>
+                        <span className="value">{record.total_shifts}</span>
+                      </div>
+                      <div className="history-stat">
+                        <span className="label">Заработок:</span>
+                        <span className="value earnings">{record.total_earnings.toLocaleString()}₽</span>
+                      </div>
+                      <div className="history-stat">
+                        <span className="label">Средняя ставка:</span>
+                        <span className="value">{record.average_per_shift.toLocaleString()}₽</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="modal-actions">
+              <button 
+                type="button" 
+                onClick={() => setShowHistory(false)}
+                className="cancel-btn"
+              >
+                Закрыть
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
