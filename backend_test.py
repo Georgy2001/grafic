@@ -591,8 +591,8 @@ class ShiftScheduleAPITester:
             return self.log_test("Update Earnings (Employee Recent)", False, "- Missing employee token or store ID")
             
         current_date = datetime.now()
-        # Use the first day of current month (which exists in our test schedule)
-        test_date = f"{current_date.year}-{current_date.month:02d}-01"
+        # Use today's date for testing (should be within 12 hours)
+        test_date = current_date.strftime("%Y-%m-%d")
         
         earnings_data = {"earnings": 1800.0}
         
