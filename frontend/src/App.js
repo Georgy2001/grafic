@@ -347,8 +347,8 @@ function App() {
             </div>
           )}
           
-          {/* Edit button - show for managers always, for employees only if editable */}
-          {(user?.role === 'manager' || (user?.role === 'employee' && editable)) && (
+          {/* Edit button - only for managers */}
+          {user?.role === 'manager' && (
             <button 
               className="edit-day-btn"
               onClick={() => editDayShift(dateStr)}
