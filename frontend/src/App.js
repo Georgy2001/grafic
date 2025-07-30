@@ -451,6 +451,117 @@ const LoginForm = ({ onLogin, loading }) => {
   );
 };
 
+const ShiftEditForm = ({ date, users, shiftForm, setShiftForm, onSave, onCancel }) => {
+  const toggleEmployee = (employeeId) => {
+    const isSelected = shiftForm.selectedEmployees.includes(employeeId);
+    if (isSelected) {
+      setShiftForm({
+        ...shiftForm,
+        selectedEmployees: shiftForm.selectedEmployees.filter(id => id !== employeeId)
+      });
+    } else {
+      setShiftForm({
+        ...shiftForm,
+        selectedEmployees: [...shiftForm.selectedEmployees, employeeId]
+      });
+    }
+  };
+
+  const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    weekday: 'long'
+  });
+
+  return (
+    <div className="shift-edit-overlay">
+      <div className="shift-edit-form">
+        <h3>Редактирование смены</h3>
+        <p className="edit-date">{formattedDate}</p>
+        
+        <div className="form-section">
+          <label>Тип смены:</label>
+          <div className="shift-type-buttons">
+            <button 
+              type="button"
+              className={shiftForm.type === 'day' ? 'type-btn active' : 'type-btn'}
+              onClick={() => setShiftForm({...shiftForm, type: 'day'})}
+            >
+              ☀️ День (12ч)
+            </button>
+            <button 
+              type="button"
+              className={shiftForm.type === 'night' ? 'type-btn active' : 'type-btn'}
+              onClick={() => setShiftForm({...shiftForm, type: 'night'})}
+            >
+              🌙 Ночь (12ч)
+            </button>
+            <button 
+              type="button"
+              className={shiftForm.type === 'custom' ? 'type-btn active' : 'type-btn'}
+              onClick={() => setShiftForm({...shiftForm, type: 'custom'})}
+            >
+              ⏰ Свои часы
+            </button>
+          </div>
+        </div>
+
+        {shiftForm.type === 'custom' && (
+          <div className="form-section">
+            <label>Количество часов:</label>
+            <input
+              type="number"
+              min="1"
+              max="24"
+              value={shiftForm.hours || ''}
+              onChange={(e) => setShiftForm({...shiftForm, hours: parseInt(e.target.value)})}
+              placeholder="8"
+            />
+          </div>
+        )}
+
+        <div className="form-section">
+          <label>Сотрудники на смене:</label>
+          <div className="employees-list">
+            {users.map(user => (
+              <div 
+                key={user.id} 
+                className={shiftForm.selectedEmployees.includes(user.id) ? 'employee-item selected' : 'employee-item'}
+                onClick={() => toggleEmployee(user.id)}
+              >
+                <div className="employee-checkbox">
+                  {shiftForm.selectedEmployees.includes(user.id) ? '✓' : ''}
+                </div>
+                <div className="employee-details">
+                  <span className="employee-name">{user.name}</span>
+                  <span className="employee-email">{user.email}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          {users.length === 0 && (
+            <p className="no-employees">Нет сотрудников. Создайте сотрудников на вкладке "Сотрудники".</p>
+          )}
+        </div>
+
+        <div className="form-actions">
+          <button type="button" onClick={onCancel} className="cancel-btn">
+            Отмена
+          </button>
+          <button 
+            type="button" 
+            onClick={onSave} 
+            className="save-btn"
+            disabled={shiftForm.type === 'custom' && !shiftForm.hours}
+          >
+            Сохранить смену
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const UsersManagement = ({ users, onCreateUser, onDeleteUser }) => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
