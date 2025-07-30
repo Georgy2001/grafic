@@ -796,15 +796,34 @@ const ShiftEditForm = ({ date, users, shiftForm, setShiftForm, onSave, onCancel 
   );
 };
 
-const UsersManagement = ({ users, onCreateUser, onDeleteUser }) => {
+const UsersManagement = ({ users, stores, onCreateUser, onDeleteUser }) => {
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', selectedStores: [] });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onCreateUser({ ...formData, role: 'employee' });
-    setFormData({ name: '', email: '', password: '' });
+    onCreateUser({ 
+      ...formData, 
+      role: 'employee',
+      store_ids: formData.selectedStores
+    });
+    setFormData({ name: '', email: '', password: '', selectedStores: [] });
     setShowForm(false);
+  };
+
+  const toggleStore = (storeId) => {
+    const isSelected = formData.selectedStores.includes(storeId);
+    if (isSelected) {
+      setFormData({
+        ...formData,
+        selectedStores: formData.selectedStores.filter(id => id !== storeId)
+      });
+    } else {
+      setFormData({
+        ...formData,
+        selectedStores: [...formData.selectedStores, storeId]
+      });
+    }
   };
 
   return (
