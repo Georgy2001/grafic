@@ -426,10 +426,11 @@ body {
 .user-form {
   background: white !important;
   border-radius: 0.5rem;
-  padding: 2rem;
-  width: 100% !important;
-  max-width: 700px !important;
-  max-height: 85vh;
+  padding: 2.5rem !important;
+  width: 95% !important;
+  max-width: 900px !important;
+  min-width: 600px !important;
+  max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
