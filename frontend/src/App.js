@@ -880,7 +880,7 @@ const UsersManagement = ({ users, stores, onCreateUser, onDeleteUser }) => {
               maxWidth: '1200px',
               minWidth: '800px',
               width: '85vw',
-              padding: '3rem'
+              padding: '2rem'
             }}
           >
             <h3>Новый сотрудник</h3>
