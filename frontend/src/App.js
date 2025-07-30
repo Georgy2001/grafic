@@ -636,6 +636,15 @@ function App() {
               </div>
             </div>
 
+            {/* Calendar Header with Week Days */}
+            <div className="calendar-header">
+              {weekDays.map((day) => (
+                <div key={day} className="calendar-header-day">
+                  {day}
+                </div>
+              ))}
+            </div>
+
             <div className="calendar-grid">
               {renderCalendarGrid()}
             </div>
