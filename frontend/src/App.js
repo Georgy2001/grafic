@@ -23,6 +23,52 @@ function App() {
 
   const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
+  // Конфигурация времени смен
+  const SHIFT_CONFIG = {
+    day_shift: {
+      start: 9, // 9:00
+      end: 21   // 21:00
+    },
+    night_shift: {
+      start: 21, // 21:00
+      end: 9     // 9:00 следующего дня
+    }
+  };
+
+  // Проверка доступности даты для редактирования
+  const isDateEditable = (dateStr) => {
+    // Менеджеры могут редактировать любые даты
+    if (user?.role === 'manager') {
+      return true;
+    }
+
+    const targetDate = new Date(dateStr);
+    const now = new Date();
+    
+    // Если дата в будущем - всегда доступна
+    if (targetDate > now) {
+      return true;
+    }
+    
+    // Если это сегодня
+    if (targetDate.toDateString() === now.toDateString()) {
+      return true; // Сегодня всегда доступно
+    }
+    
+    // Если это вчера, проверяем время окончания ночной смены
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (targetDate.toDateString() === yesterday.toDateString()) {
+      // Дата доступна до 9:00 утра следующего дня (сегодня)
+      const currentHour = now.getHours();
+      return currentHour < SHIFT_CONFIG.night_shift.end;
+    }
+    
+    // Все остальные прошлые даты недоступны
+    return false;
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
