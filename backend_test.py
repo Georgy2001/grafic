@@ -164,12 +164,15 @@ class ShiftScheduleAPITester:
             
         success, data = self.api_call('GET', '/users', token=self.manager_token)
         
+        # Debug output
+        print(f"DEBUG: Get users response - Success: {success}, Data: {data}")
+        
         if success and isinstance(data, list):
             return self.log_test("Get Users (Manager)", True, 
                                f"- Found {len(data)} users")
         else:
             return self.log_test("Get Users (Manager)", False, 
-                               f"- Error: {data.get('detail', 'Unknown error')}")
+                               f"- Error: {data.get('detail', data)}")
 
     def test_get_users_as_employee(self) -> bool:
         """Test getting users list as employee (should fail)"""
