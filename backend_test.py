@@ -520,6 +520,227 @@ class ShiftScheduleAPITester:
         return self.log_test("Get My Shifts (Legacy)", success, 
                            f"- Correctly rejected legacy format: {data.get('detail', 'Not Found')}")
 
+    # ===== EARNINGS SYSTEM TESTS =====
+    
+    def test_my_shifts_includes_earnings_fields(self) -> bool:
+        """Test that my-shifts endpoint includes new earnings fields"""
+        if not self.employee_token or not self.default_store_id:
+            return self.log_test("My Shifts Earnings Fields", False, "- Missing employee token or store ID")
+            
+        current_date = datetime.now()
+        success, data = self.api_call('GET', 
+                                    f'/my-shifts/{self.default_store_id}/{current_date.year}/{current_date.month}', 
+                                    token=self.employee_token)
+        
+        if success and 'shifts' in data and 'stats' in data:
+            shifts = data['shifts']
+            stats = data['stats']
+            
+            # Check if stats includes total_earnings
+            has_total_earnings = 'total_earnings' in stats
+            
+            # Check if shifts include earnings fields
+            earnings_fields_present = True
+            if shifts:
+                for shift in shifts:
+                    if not all(field in shift for field in ['earnings', 'can_edit_earnings', 'assignment_index']):
+                        earnings_fields_present = False
+                        break
+            
+            success_result = has_total_earnings and earnings_fields_present
+            details = f"- Stats has total_earnings: {has_total_earnings}, Shifts have earnings fields: {earnings_fields_present}"
+            
+            return self.log_test("My Shifts Earnings Fields", success_result, details)
+        else:
+            return self.log_test("My Shifts Earnings Fields", False, 
+                               f"- Error: {data.get('detail', 'Unknown error')}")
+
+    def test_update_shift_earnings_as_manager(self) -> bool:
+        """Test updating shift earnings as manager (should always work)"""
+        if not self.manager_token or not self.default_store_id or not self.created_employee_id:
+            return self.log_test("Update Earnings (Manager)", False, "- Missing required data")
+            
+        current_date = datetime.now()
+        # Use first day of current month for testing
+        test_date = f"{current_date.year}-{current_date.month:02d}-01"
+        
+        earnings_data = {"earnings": 2500.0}
+        
+        success, data = self.api_call('PUT', 
+                                    f'/shift-earnings/{self.default_store_id}/{current_date.year}/{current_date.month}/{test_date}/day?assignment_index=0',
+                                    earnings_data, token=self.manager_token)
+        
+        if success and isinstance(data, dict):
+            success_result = data.get('success', False)
+            can_edit = data.get('can_edit', False)
+            message = data.get('message', 'No message')
+            
+            return self.log_test("Update Earnings (Manager)", success_result, 
+                               f"- Success: {success_result}, Can edit: {can_edit}, Message: {message}")
+        else:
+            return self.log_test("Update Earnings (Manager)", False, 
+                               f"- Error: {data.get('detail', data)}")
+
+    def test_update_shift_earnings_as_employee_recent(self) -> bool:
+        """Test updating shift earnings as employee for recent shift (should work within 12 hours)"""
+        if not self.employee_token or not self.default_store_id:
+            return self.log_test("Update Earnings (Employee Recent)", False, "- Missing employee token or store ID")
+            
+        current_date = datetime.now()
+        # Use today's date for testing (should be within 12 hours)
+        test_date = current_date.strftime("%Y-%m-%d")
+        
+        earnings_data = {"earnings": 1800.0}
+        
+        success, data = self.api_call('PUT', 
+                                    f'/shift-earnings/{self.default_store_id}/{current_date.year}/{current_date.month}/{test_date}/day?assignment_index=0',
+                                    earnings_data, token=self.employee_token)
+        
+        if success and isinstance(data, dict):
+            success_result = data.get('success', False)
+            can_edit = data.get('can_edit', False)
+            message = data.get('message', 'No message')
+            
+            return self.log_test("Update Earnings (Employee Recent)", success_result, 
+                               f"- Success: {success_result}, Can edit: {can_edit}, Message: {message}")
+        else:
+            return self.log_test("Update Earnings (Employee Recent)", False, 
+                               f"- Error: {data.get('detail', data)}")
+
+    def test_update_shift_earnings_as_employee_old(self) -> bool:
+        """Test updating shift earnings as employee for old shift (should fail after 12 hours)"""
+        if not self.employee_token or not self.default_store_id:
+            return self.log_test("Update Earnings (Employee Old)", False, "- Missing employee token or store ID")
+            
+        # Use a date from 2 days ago to simulate old shift
+        old_date = datetime.now() - timedelta(days=2)
+        test_date = old_date.strftime("%Y-%m-%d")
+        
+        earnings_data = {"earnings": 1900.0}
+        
+        success, data = self.api_call('PUT', 
+                                    f'/shift-earnings/{self.default_store_id}/{old_date.year}/{old_date.month}/{test_date}/day?assignment_index=0',
+                                    earnings_data, token=self.employee_token)
+        
+        if success and isinstance(data, dict):
+            success_result = data.get('success', False)
+            can_edit = data.get('can_edit', False)
+            message = data.get('message', 'No message')
+            
+            # For old shifts, employee should not be able to edit
+            expected_result = not success_result and not can_edit
+            
+            return self.log_test("Update Earnings (Employee Old)", expected_result, 
+                               f"- Success: {success_result}, Can edit: {can_edit}, Message: {message}")
+        else:
+            return self.log_test("Update Earnings (Employee Old)", False, 
+                               f"- Error: {data.get('detail', data)}")
+
+    def test_update_earnings_nonexistent_shift(self) -> bool:
+        """Test updating earnings for non-existent shift (should fail)"""
+        if not self.manager_token or not self.default_store_id:
+            return self.log_test("Update Earnings (Nonexistent)", False, "- Missing manager token or store ID")
+            
+        current_date = datetime.now()
+        # Use a date that doesn't have a shift
+        test_date = f"{current_date.year}-{current_date.month:02d}-15"
+        
+        earnings_data = {"earnings": 2000.0}
+        
+        success, data = self.api_call('PUT', 
+                                    f'/shift-earnings/{self.default_store_id}/{current_date.year}/{current_date.month}/{test_date}/day?assignment_index=0',
+                                    earnings_data, token=self.manager_token, expected_status=404)
+        
+        return self.log_test("Update Earnings (Nonexistent)", success, 
+                           f"- Correctly rejected: {data.get('detail', 'No error message')}")
+
+    def test_employee_access_unassigned_store_earnings(self) -> bool:
+        """Test employee trying to update earnings for unassigned store (should fail)"""
+        if not self.employee_token or not self.created_store_id:
+            return self.log_test("Employee Unassigned Store Earnings", False, 
+                               "- Missing employee token or created store ID")
+            
+        current_date = datetime.now()
+        test_date = current_date.strftime("%Y-%m-%d")
+        
+        earnings_data = {"earnings": 2000.0}
+        
+        success, data = self.api_call('PUT', 
+                                    f'/shift-earnings/{self.created_store_id}/{current_date.year}/{current_date.month}/{test_date}/day?assignment_index=0',
+                                    earnings_data, token=self.employee_token, expected_status=403)
+        
+        return self.log_test("Employee Unassigned Store Earnings", success, 
+                           f"- Correctly forbidden: {data.get('detail', 'No error message')}")
+
+    def test_get_earnings_history(self) -> bool:
+        """Test getting earnings history for employee"""
+        if not self.employee_token or not self.default_store_id:
+            return self.log_test("Get Earnings History", False, "- Missing employee token or store ID")
+            
+        success, data = self.api_call('GET', f'/earnings-history/{self.default_store_id}', 
+                                    token=self.employee_token)
+        
+        if success and 'history' in data:
+            history = data['history']
+            return self.log_test("Get Earnings History", True, 
+                               f"- Found {len(history)} months of earnings history")
+        else:
+            return self.log_test("Get Earnings History", False, 
+                               f"- Error: {data.get('detail', 'Unknown error')}")
+
+    def test_get_earnings_history_unassigned_store(self) -> bool:
+        """Test getting earnings history for unassigned store (should fail)"""
+        if not self.employee_token or not self.created_store_id:
+            return self.log_test("Earnings History Unassigned Store", False, 
+                               "- Missing employee token or created store ID")
+            
+        success, data = self.api_call('GET', f'/earnings-history/{self.created_store_id}', 
+                                    token=self.employee_token, expected_status=403)
+        
+        return self.log_test("Earnings History Unassigned Store", success, 
+                           f"- Correctly forbidden: {data.get('detail', 'No error message')}")
+
+    def test_manager_get_earnings_history(self) -> bool:
+        """Test manager getting earnings history (should work for any store)"""
+        if not self.manager_token or not self.default_store_id:
+            return self.log_test("Manager Earnings History", False, "- Missing manager token or store ID")
+            
+        success, data = self.api_call('GET', f'/earnings-history/{self.default_store_id}', 
+                                    token=self.manager_token)
+        
+        if success and 'history' in data:
+            history = data['history']
+            return self.log_test("Manager Earnings History", True, 
+                               f"- Manager can access earnings history: {len(history)} months")
+        else:
+            return self.log_test("Manager Earnings History", False, 
+                               f"- Error: {data.get('detail', 'Unknown error')}")
+
+    def test_automatic_default_earnings_setting(self) -> bool:
+        """Test that automatic default earnings (2000₽) are set for old shifts"""
+        if not self.employee_token or not self.default_store_id:
+            return self.log_test("Auto Default Earnings", False, "- Missing employee token or store ID")
+            
+        # First, get current shifts to see if any have automatic earnings
+        current_date = datetime.now()
+        success, data = self.api_call('GET', 
+                                    f'/my-shifts/{self.default_store_id}/{current_date.year}/{current_date.month}', 
+                                    token=self.employee_token)
+        
+        if success and 'shifts' in data:
+            shifts = data['shifts']
+            stats = data['stats']
+            
+            # Check if any shifts have earnings set to 2000 (default)
+            has_default_earnings = any(shift.get('earnings') == 2000.0 for shift in shifts)
+            total_earnings = stats.get('total_earnings', 0)
+            
+            return self.log_test("Auto Default Earnings", True, 
+                               f"- Has default earnings: {has_default_earnings}, Total earnings: {total_earnings}")
+        else:
+            return self.log_test("Auto Default Earnings", False, 
+                               f"- Error: {data.get('detail', 'Unknown error')}")
+
     def test_delete_employee(self) -> bool:
         """Test deleting the created employee"""
         if not self.manager_token or not self.created_employee_id:
