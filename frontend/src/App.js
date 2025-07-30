@@ -136,7 +136,7 @@ function App() {
     }
   };
 
-  const saveSchedule = async (shifts) => {
+  const saveSchedule = async (days) => {
     try {
       setLoading(true);
       await apiCall('/schedules', {
@@ -144,7 +144,7 @@ function App() {
         body: JSON.stringify({
           month: selectedMonth,
           year: selectedYear,
-          shifts
+          days
         })
       });
       fetchSchedule();
