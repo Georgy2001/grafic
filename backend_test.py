@@ -46,6 +46,8 @@ class ShiftScheduleAPITester:
                 response = self.session.get(url, headers=headers)
             elif method == 'POST':
                 response = self.session.post(url, json=data, headers=headers)
+            elif method == 'PUT':
+                response = self.session.put(url, json=data, headers=headers)
             elif method == 'DELETE':
                 response = self.session.delete(url, headers=headers)
             else:
