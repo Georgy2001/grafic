@@ -136,8 +136,9 @@ function App() {
   };
 
   const fetchSchedule = async () => {
+    if (!selectedStore) return;
     try {
-      const response = await apiCall(`/schedules/${selectedYear}/${selectedMonth}`);
+      const response = await apiCall(`/schedules/${selectedStore.id}/${selectedYear}/${selectedMonth}`);
       setSchedule(response.schedule);
     } catch (error) {
       console.error('Error fetching schedule:', error);
