@@ -100,6 +100,7 @@ class DaySchedule(BaseModel):
 
 class Schedule(BaseModel):
     id: str
+    store_id: str  # Link schedule to specific store
     month: int
     year: int
     days: List[DaySchedule]
@@ -107,6 +108,7 @@ class Schedule(BaseModel):
     updated_at: datetime
 
 class ScheduleCreate(BaseModel):
+    store_id: str  # Required field for creating schedule
     month: int
     year: int
     days: List[DaySchedule]
