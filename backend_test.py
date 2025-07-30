@@ -113,27 +113,26 @@ class ShiftScheduleAPITester:
                            f"- User: {data.get('name', 'Unknown')}, Role: {data.get('role', 'Unknown')}")
 
     def test_create_employee(self) -> bool:
-        """Test creating a new employee"""
-        if not self.manager_token:
-            return self.log_test("Create Employee", False, "- No manager token available")
+        """Test creating a new employee with store assignment"""
+        if not self.manager_token or not self.default_store_id:
+            return self.log_test("Create Employee", False, "- No manager token or default store available")
             
         employee_data = {
             "email": f"test_employee_{datetime.now().strftime('%H%M%S')}@company.com",
             "name": "Test Employee",
             "password": "employee123",
-            "role": "employee"
+            "role": "employee",
+            "store_ids": [self.default_store_id]  # Assign to default store
         }
         
         success, data = self.api_call('POST', '/auth/register', employee_data, 
                                     token=self.manager_token, expected_status=200)
         
-        # Debug output
-        print(f"DEBUG: Create employee response - Success: {success}, Data: {data}")
-        
         if success and 'user' in data:
             self.created_employee_id = data['user']['id']
+            store_count = len(data['user'].get('store_ids', []))
             return self.log_test("Create Employee", True, 
-                               f"- Created: {data['user']['name']} (ID: {self.created_employee_id})")
+                               f"- Created: {data['user']['name']} with {store_count} store(s)")
         else:
             return self.log_test("Create Employee", False, 
                                f"- Error: {data.get('detail', data)}")
