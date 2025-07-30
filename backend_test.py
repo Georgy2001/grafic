@@ -118,8 +118,11 @@ class ShiftScheduleAPITester:
         if not self.manager_token or not self.default_store_id:
             return self.log_test("Create Employee", False, "- No manager token or default store available")
             
+        # Generate unique email and store it
+        self.created_employee_email = f"test_employee_{datetime.now().strftime('%Y%m%d_%H%M%S')}@company.com"
+        
         employee_data = {
-            "email": f"test_employee_{datetime.now().strftime('%H%M%S')}@company.com",
+            "email": self.created_employee_email,
             "name": "Test Employee",
             "password": "employee123",
             "role": "employee",
@@ -140,14 +143,11 @@ class ShiftScheduleAPITester:
 
     def test_employee_login(self) -> bool:
         """Test login with created employee"""
-        if not self.created_employee_id:
-            return self.log_test("Employee Login", False, "- No employee created")
+        if not self.created_employee_email:
+            return self.log_test("Employee Login", False, "- No employee email available")
             
-        # Get employee email from the creation test
-        employee_email = f"test_employee_{datetime.now().strftime('%H%M%S')}@company.com"
-        
         login_data = {
-            "email": employee_email,
+            "email": self.created_employee_email,
             "password": "employee123"
         }
         
