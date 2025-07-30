@@ -115,6 +115,7 @@ def get_current_user(token_data: dict = Depends(verify_token)):
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
     user.pop("password", None)
+    user.pop("_id", None)  # Remove MongoDB ObjectId
     return user
 
 def require_manager(current_user: dict = Depends(get_current_user)):
