@@ -161,6 +161,76 @@ def require_manager(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Manager access required")
     return current_user
 
+def can_edit_earnings(shift_date: str, current_user: dict) -> bool:
+    """Проверяет, может ли пользователь редактировать ставку за смену"""
+    # Менеджеры всегда могут редактировать
+    if current_user["role"] == UserRole.MANAGER:
+        return True
+    
+    # Сотрудники могут редактировать только в течение 12 часов после смены
+    try:
+        shift_datetime = datetime.strptime(shift_date, "%Y-%m-%d")
+        # Предполагаем, что смена заканчивается в 23:59 того же дня
+        shift_end = shift_datetime.replace(hour=23, minute=59, second=59)
+        twelve_hours_later = shift_end + timedelta(hours=12)
+        
+        return datetime.now() <= twelve_hours_later
+    except:
+        return False
+
+def set_default_earnings_if_needed():
+    """Устанавливает ставки по умолчанию (2000₽) для смен старше 12 часов без ставки"""
+    try:
+        # Найти все расписания
+        schedules = schedules_collection.find({})
+        
+        for schedule in schedules:
+            updated = False
+            
+            for day in schedule.get("days", []):
+                shift_date = day.get("date")
+                if not shift_date:
+                    continue
+                
+                # Проверить все типы смен в дне
+                for shift_type in ["day_shift", "night_shift"]:
+                    shift = day.get(shift_type)
+                    if not shift:
+                        continue
+                    
+                    for assignment in shift.get("assignments", []):
+                        # Если ставка не установлена и прошло более 12 часов
+                        if (assignment.get("earnings") is None and 
+                            not can_edit_earnings(shift_date, {"role": "employee"})):
+                            
+                            assignment["earnings"] = 2000.0
+                            assignment["earnings_set_at"] = datetime.now()
+                            assignment["earnings_set_by"] = "auto"
+                            assignment["can_edit_earnings"] = False
+                            updated = True
+                
+                # Проверить custom_shifts
+                for shift in day.get("custom_shifts", []):
+                    for assignment in shift.get("assignments", []):
+                        if (assignment.get("earnings") is None and 
+                            not can_edit_earnings(shift_date, {"role": "employee"})):
+                            
+                            assignment["earnings"] = 2000.0
+                            assignment["earnings_set_at"] = datetime.now()
+                            assignment["earnings_set_by"] = "auto"
+                            assignment["can_edit_earnings"] = False
+                            updated = True
+            
+            # Обновить расписание если были изменения
+            if updated:
+                schedules_collection.update_one(
+                    {"id": schedule["id"]},
+                    {"$set": {"days": schedule["days"], "updated_at": datetime.now()}}
+                )
+    
+    except Exception as e:
+        print(f"Error setting default earnings: {e}")
+
 # Routes
 @app.get("/api/health")
 async def health_check():
