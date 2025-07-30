@@ -274,6 +274,61 @@ function App() {
     }
   };
 
+  // Функции для работы с ставкой в календаре
+  const handleCalendarEarningsClick = (date, shiftType, assignment) => {
+    const shift = {
+      date: date,
+      type: shiftType,
+      assignment_index: assignment.assignment_index || 0,
+      employee_id: assignment.employee_id,
+      employee_name: assignment.employee_name,
+      earnings: assignment.earnings,
+      can_edit_earnings: assignment.can_edit_earnings
+    };
+    
+    // Проверка доступности редактирования для сотрудников
+    if (user?.role !== 'manager' && !assignment.can_edit_earnings) {
+      return; // Не открываем модалку если нет прав
+    }
+    
+    setSelectedCalendarShift(shift);
+    setCalendarEarningsInput(assignment.earnings || '');
+    setShowCalendarEarningsModal(true);
+  };
+
+  const submitCalendarEarnings = async () => {
+    if (!selectedCalendarShift || !calendarEarningsInput) return;
+    
+    const earnings = parseFloat(calendarEarningsInput);
+    
+    // Валидация до 5000 рублей
+    if (earnings > 5000) {
+      alert('Максимальная ставка составляет 5000 рублей');
+      return;
+    }
+    
+    if (earnings < 0) {
+      alert('Ставка не может быть отрицательной');
+      return;
+    }
+    
+    const success = await updateShiftEarnings(selectedCalendarShift, earnings);
+    if (success) {
+      setShowCalendarEarningsModal(false);
+      setSelectedCalendarShift(null);
+      setCalendarEarningsInput('');
+      fetchSchedule(); // Обновить календарь
+    }
+  };
+
+  const canEditEarnings = (assignment, date, shiftType) => {
+    // Менеджеры могут редактировать всегда
+    if (user?.role === 'manager') return true;
+    
+    // Для сотрудников проверяем can_edit_earnings
+    return assignment.can_edit_earnings || false;
+  };
+
   const getMonthName = (monthNumber) => {
     return months[monthNumber - 1] || '';
   };
