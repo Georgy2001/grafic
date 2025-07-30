@@ -532,8 +532,8 @@ class ShiftScheduleAPITester:
 
     def run_all_tests(self) -> int:
         """Run all tests in sequence"""
-        print("🚀 Starting Shift Schedule Manager API Tests")
-        print("=" * 60)
+        print("🚀 Starting Shift Schedule Manager API Tests with Stores Support")
+        print("=" * 70)
         
         # Basic connectivity tests
         self.test_health_check()
@@ -543,22 +543,54 @@ class ShiftScheduleAPITester:
         self.test_invalid_login()
         self.test_get_current_user()
         
+        # Store management tests (must run before employee creation)
+        print("\n📍 STORE MANAGEMENT TESTS")
+        print("-" * 30)
+        self.test_get_default_stores()
+        self.test_create_store()
+        self.test_get_all_stores_as_manager()
+        self.test_get_specific_store()
+        self.test_update_store()
+        
         # User management tests
+        print("\n👥 USER MANAGEMENT TESTS")
+        print("-" * 30)
         self.test_create_employee()
         self.test_employee_login()
         self.test_get_users_as_manager()
         self.test_get_users_as_employee()
         
-        # Schedule management tests
-        self.test_create_schedule()
-        self.test_get_schedule()
-        self.test_get_my_shifts()
+        # Store access control tests
+        print("\n🔐 STORE ACCESS CONTROL TESTS")
+        print("-" * 30)
+        self.test_get_stores_as_employee()
+        self.test_employee_access_to_assigned_store()
+        self.test_employee_access_to_unassigned_store()
+        
+        # Store-specific schedule management tests
+        print("\n📅 STORE-SPECIFIC SCHEDULE TESTS")
+        print("-" * 30)
+        self.test_create_schedule_for_store()
+        self.test_create_schedule_for_nonexistent_store()
+        self.test_get_store_schedule()
+        self.test_get_my_shifts_for_store()
+        self.test_employee_access_unassigned_store_shifts()
+        
+        # Legacy format validation tests
+        print("\n⚠️  LEGACY FORMAT VALIDATION TESTS")
+        print("-" * 30)
+        self.test_create_schedule_legacy()
+        self.test_get_schedule_legacy()
+        self.test_get_my_shifts_legacy()
         
         # Cleanup
+        print("\n🧹 CLEANUP TESTS")
+        print("-" * 30)
         self.test_delete_employee()
+        self.test_delete_store()
         
         # Print summary
-        print("=" * 60)
+        print("=" * 70)
         print(f"📊 Test Results: {self.tests_passed}/{self.tests_run} tests passed")
         
         if self.tests_passed == self.tests_run:
