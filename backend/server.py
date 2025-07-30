@@ -447,6 +447,7 @@ async def create_default_manager():
             "name": "Default Manager",
             "password": hash_password("manager123"),
             "role": "manager",
+            "store_ids": [],  # Empty means access to all stores
             "created_at": datetime.now()
         }
         users_collection.insert_one(default_manager)
