@@ -362,7 +362,6 @@ function App() {
         <div key={day} className={`calendar-day ${isPast ? 'disabled' : ''}`}>
           <div className="day-header">
             <span className="day-number">{day}</span>
-            <span className="day-week">{weekDays[(firstDay + day - 1) % 7]}</span>
           </div>
           
           {/* Day Shift */}
