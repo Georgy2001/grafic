@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 
 class ShiftScheduleAPITester:
-    def __init__(self, base_url: str = "https://08740b38-73d8-4691-b505-4ba6b3e7a9dd.preview.emergentagent.com"):
+    def __init__(self, base_url: str = "https://b9737b4f-6e22-4b3a-b9f1-8ca58912bfa6.preview.emergentagent.com"):
         self.base_url = base_url
         self.manager_token = None
         self.employee_token = None
