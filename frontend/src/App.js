@@ -366,6 +366,11 @@ function App() {
     selectedEmployees: []
   });
 
+  // Состояние для ввода ставки в календаре
+  const [showCalendarEarningsModal, setShowCalendarEarningsModal] = useState(false);
+  const [selectedCalendarShift, setSelectedCalendarShift] = useState(null);
+  const [calendarEarningsInput, setCalendarEarningsInput] = useState('');
+
   const editDayShift = (dateStr) => {
     const daySchedule = schedule?.days?.find(d => d.date === dateStr);
     
