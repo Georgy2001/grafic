@@ -405,8 +405,24 @@ function App() {
               </div>
               <div className="shift-employees">
                 {daySchedule.night_shift.assignments?.map((assignment, idx) => (
-                  <div key={idx} className="employee-name">
-                    {assignment.employee_name}
+                  <div key={idx} className="employee-assignment">
+                    <div className="employee-name">
+                      {assignment.employee_name}
+                    </div>
+                    <button
+                      className={`earnings-btn ${canEditEarnings(assignment, dateStr, 'night') ? 'editable' : 'disabled'}`}
+                      onClick={() => handleCalendarEarningsClick(dateStr, 'night', assignment)}
+                      title={
+                        assignment.earnings 
+                          ? `Ставка: ${assignment.earnings}₽` 
+                          : canEditEarnings(assignment, dateStr, 'night')
+                            ? 'Указать ставку'
+                            : 'Время редактирования истекло'
+                      }
+                      disabled={!canEditEarnings(assignment, dateStr, 'night')}
+                    >
+                      ₽
+                    </button>
                   </div>
                 ))}
               </div>
