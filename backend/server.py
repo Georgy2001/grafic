@@ -170,6 +170,7 @@ async def register_user(user_data: UserCreate, current_user: dict = Depends(requ
         "name": user_data.name,
         "password": hashed_password,
         "role": user_data.role,
+        "store_ids": user_data.store_ids,
         "created_at": datetime.now()
     }
     
