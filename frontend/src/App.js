@@ -601,10 +601,7 @@ const LoginForm = ({ onLogin, loading }) => {
           </button>
         </form>
 
-        <div className="login-demo">
-          <p><strong>Демо данные:</strong></p>
-          <p>Менеджер: manager@company.com / manager123</p>
-        </div>
+
       </div>
     </div>
   );
