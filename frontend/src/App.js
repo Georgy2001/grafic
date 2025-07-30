@@ -91,7 +91,48 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    setSelectedStore(null);
     setCurrentView('login');
+  };
+
+  const fetchStores = async () => {
+    try {
+      const response = await apiCall('/stores');
+      setStores(response);
+      // Auto-select first store if available
+      if (response.length > 0 && !selectedStore) {
+        setSelectedStore(response[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching stores:', error);
+    }
+  };
+
+  const createStore = async (storeData) => {
+    try {
+      await apiCall('/stores', {
+        method: 'POST',
+        body: JSON.stringify(storeData)
+      });
+      fetchStores();
+      alert('Точка продаж создана успешно');
+    } catch (error) {
+      alert('Ошибка создания: ' + error.message);
+    }
+  };
+
+  const deleteStore = async (storeId) => {
+    try {
+      await apiCall(`/stores/${storeId}`, { method: 'DELETE' });
+      fetchStores();
+      // If deleted store was selected, select first available
+      if (selectedStore?.id === storeId && stores.length > 1) {
+        setSelectedStore(stores.find(s => s.id !== storeId));
+      }
+      alert('Точка продаж удалена');
+    } catch (error) {
+      alert('Ошибка удаления: ' + error.message);
+    }
   };
 
   const fetchSchedule = async () => {
