@@ -658,6 +658,18 @@ body {
   text-transform: capitalize;
 }
 
+.shift-section-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+  display: block;
+  padding: 0.5rem;
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  border-left: 4px solid #4f46e5;
+}
+
 .form-section {
   margin-bottom: 1.5rem;
 }
