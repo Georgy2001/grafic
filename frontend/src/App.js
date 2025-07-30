@@ -628,7 +628,7 @@ const LoginForm = ({ onLogin, loading }) => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="manager@company.com"
+              placeholder="Введите email"
               required
             />
           </div>
