@@ -434,23 +434,42 @@ function App() {
               <h2>
                 {currentView === 'schedule' ? 'Управление расписанием' : 'Мое расписание'}
               </h2>
-              <div className="month-selector">
-                <select 
-                  value={selectedMonth} 
-                  onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                >
-                  {months.map((month, idx) => (
-                    <option key={idx} value={idx + 1}>{month}</option>
-                  ))}
-                </select>
-                <select 
-                  value={selectedYear} 
-                  onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                >
-                  {[2024, 2025, 2026].map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
+              <div className="schedule-controls">
+                <div className="store-selector">
+                  <label>Точка продаж:</label>
+                  <select 
+                    value={selectedStore?.id || ''} 
+                    onChange={(e) => {
+                      const store = stores.find(s => s.id === e.target.value);
+                      setSelectedStore(store);
+                    }}
+                  >
+                    <option value="">Выберите точку</option>
+                    {stores.map(store => (
+                      <option key={store.id} value={store.id}>
+                        {store.name} - {store.address}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="month-selector">
+                  <select 
+                    value={selectedMonth} 
+                    onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                  >
+                    {months.map((month, idx) => (
+                      <option key={idx} value={idx + 1}>{month}</option>
+                    ))}
+                  </select>
+                  <select 
+                    value={selectedYear} 
+                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                  >
+                    {[2024, 2025, 2026].map(year => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
