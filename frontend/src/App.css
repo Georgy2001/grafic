@@ -1107,8 +1107,8 @@ body {
   color: #374151;
 }
 
-.stores-list {
-  max-height: 200px;
+.user-form .stores-list {
+  max-height: 150px;
   overflow-y: auto;
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
