@@ -877,10 +877,10 @@ const UsersManagement = ({ users, stores, onCreateUser, onDeleteUser }) => {
           <div 
             className="user-form" 
             style={{
-              maxWidth: '900px',
-              minWidth: '600px',
-              width: '95%',
-              padding: '2.5rem'
+              maxWidth: '1000px',
+              minWidth: '700px',
+              width: '90%',
+              padding: '3rem'
             }}
           >
             <h3>Новый сотрудник</h3>
