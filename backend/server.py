@@ -176,7 +176,7 @@ async def get_current_user_info(current_user: dict = Depends(get_current_user)):
 
 @app.get("/api/users")
 async def get_users(current_user: dict = Depends(require_manager)):
-    users = list(users_collection.find({}, {"password": 0}))
+    users = list(users_collection.find({}, {"password": 0, "_id": 0}))
     return users
 
 @app.delete("/api/users/{user_id}")
