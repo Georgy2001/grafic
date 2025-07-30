@@ -16,6 +16,7 @@ class ShiftScheduleAPITester:
         self.manager_token = None
         self.employee_token = None
         self.created_employee_id = None
+        self.created_employee_email = None  # Store employee email
         self.created_store_id = None
         self.default_store_id = None
         self.tests_run = 0
