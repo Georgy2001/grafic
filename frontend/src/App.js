@@ -34,6 +34,12 @@ function App() {
 
   useEffect(() => {
     if (user) {
+      fetchStores();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user && selectedStore) {
       fetchSchedule();
       if (user.role === 'manager') {
         fetchUsers();
@@ -41,7 +47,7 @@ function App() {
         fetchMyShifts();
       }
     }
-  }, [user, selectedMonth, selectedYear]);
+  }, [user, selectedStore, selectedMonth, selectedYear]);
 
   const apiCall = async (endpoint, options = {}) => {
     const token = localStorage.getItem('token');
