@@ -427,11 +427,11 @@ body {
 .user-form {
   background: white !important;
   border-radius: 0.75rem;
-  padding: 3rem !important;
+  padding: 2rem !important;
   width: 85% !important;
   max-width: 1200px !important;
   min-width: 800px !important;
-  max-height: 75vh;
+  max-height: 70vh;
   overflow-y: auto;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
   position: relative;
